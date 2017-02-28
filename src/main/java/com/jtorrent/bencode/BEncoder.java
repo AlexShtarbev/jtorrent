@@ -24,11 +24,8 @@ public class BEncoder implements IEncode {
 		} 
 		
 		IEncode encoder = null;
-		if (o instanceof String) {
+		if (o instanceof String || o instanceof byte[]) {
 			encoder = BByteStringCoder.instance();
-		} else if (o instanceof byte[]) {
-			encoder = BByteStringCoder.instance();
-			o = new String((byte[])o);
 		} else if (o instanceof Number) {
 			encoder = BIntegerCoder.instance();
 		} else if (o instanceof List) {
@@ -41,5 +38,4 @@ public class BEncoder implements IEncode {
 		
 		encoder.encode(o, out);
 	}
-
 }

@@ -1,7 +1,11 @@
 package com.jtorrent.bencode;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+
+import org.apache.commons.io.input.AutoCloseInputStream;
 
 public class BDecoder implements IDecode{
 	
@@ -15,6 +19,11 @@ public class BDecoder implements IDecode{
 		}
 		
 		return _instance;
+	}
+	
+	public BObject decode(ByteBuffer in) throws IOException {
+		return decode(new AutoCloseInputStream(
+			new ByteArrayInputStream(in.array())));
 	}
 
 	public BObject decode(InputStream in) throws IOException {		

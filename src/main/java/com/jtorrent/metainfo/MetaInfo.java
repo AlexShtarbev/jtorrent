@@ -37,7 +37,7 @@ public class MetaInfo {
 	
 	public static final String HASHING_ALGORITHM = "SHA-1";
 	
-	// Fileds.
+	// Fields.
 	private final Map<String, BObject> _decodedMetaInfo;
 	private final Map<String, BObject> _info;
 	private final List<List<URI>> _announceList;
@@ -78,7 +78,7 @@ public class MetaInfo {
 	private byte[] provideInfoHash() throws IOException, NoSuchAlgorithmException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		// First the info from the meta file needs to be encoded.
-		BEncoder.instance().encode(_info, out);
+		BEncoder.instance().encode(_info, out);		
 		
 		// The encoded date is encrypted using the sha1 hashing algorithm.
 		MessageDigest encryptedInfo = MessageDigest.getInstance(HASHING_ALGORITHM);

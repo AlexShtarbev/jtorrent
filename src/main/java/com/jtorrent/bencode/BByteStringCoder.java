@@ -79,14 +79,20 @@ public class BByteStringCoder implements IDecode, IEncode {
 	}
 	
 	public void encode(Object o, OutputStream out) throws IOException {
-		if(!(o instanceof String)) {
-			throw new BObject.BEncodingException("encode: BByteStringCoder expected string, got " + o.getClass().getName());
+		if(!(o instanceof byte[] || o instanceof String)) {
+			throw new BObject.BEncodingException("encode: BByteStringCoder expected String or byte[], got " + o.getClass().getName());
 		}
-		String byteString = (String) o;
-		String l = Integer.toString(byteString.length());
+		
+		byte[] data;
+		if(o instanceof String) {
+			data = ((String)o).getBytes(BObject.BYTE_ENCODING);
+		} else {
+			data = (byte[])o;
+		}
+		String l = Integer.toString(data.length);
 		out.write(l.getBytes(BObject.BYTE_ENCODING));
 		out.write(DELIMETER);
-		out.write(byteString.getBytes());
+		out.write(data);
 	}
 
 	public static void main(String[] args) {

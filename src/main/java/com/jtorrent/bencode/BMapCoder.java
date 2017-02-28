@@ -62,12 +62,12 @@ public class BMapCoder implements IDecode, IEncode {
 		List<String> list = new ArrayList<String>(keySet);
 		Collections.sort(list);
 
+		out.write('d');
 		for (String key : list) {
 			Object value = ((Map<String, BObject>)o).get(key);
 			BEncoder.instance().encode(key, out);
 			BEncoder.instance().encode(value, out);
 		}
-
 		out.write('e');
 	}
 	
