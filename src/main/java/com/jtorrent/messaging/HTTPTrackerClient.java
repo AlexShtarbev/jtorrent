@@ -1,4 +1,4 @@
-package com.jtorrent.announce;
+package com.jtorrent.messaging;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,8 +11,9 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import com.jtorrent.announce.messaging.TrackerRequestEvent;
-import com.jtorrent.announce.messaging.TrackerRequestMessage;
+import com.jtorrent.messaging.base.TrackerRequestEvent;
+import com.jtorrent.messaging.base.TrackerRequestMessage;
+import com.jtorrent.messaging.base.TrackerResponseMessage;
 import com.jtorrent.messaging.http.HTTPTrackerRequestMessage;
 import com.jtorrent.messaging.http.HTTPTrackerResponseMessage;
 import com.jtorrent.peer.Peer;
@@ -25,7 +26,7 @@ public class HTTPTrackerClient extends TrackerClient{
 	}
 
 	@Override
-	public void queryTracker(TrackerRequestEvent event) throws AnnounceException {
+	public TrackerResponseMessage queryTracker(TrackerRequestEvent event) throws AnnounceException, IOException {
 		InputStream in = send(event);
 		if(in == null){
 			throw new AnnounceException("got no response from tracker");
@@ -42,8 +43,9 @@ public class HTTPTrackerClient extends TrackerClient{
 			// FIXME
 			System.out.println("printing response...");
 			System.out.println(response.toString());
+			return response;
 		} catch (IOException e) {
-			throw new AnnounceException("could not write the input stream from the tracker");
+			throw e;
 		} finally {
 			try {
 				out.close();
@@ -56,12 +58,18 @@ public class HTTPTrackerClient extends TrackerClient{
 	private InputStream send(TrackerRequestEvent event) throws AnnounceException {
 		Peer clientPeer = _session.getSessionInfo().getClientPeer();
 		SessionInfo sessionInfo = _session.getSessionInfo();
+		// The documentation states that there are trackers that only accept
+		// compact peer requests. To accommodate these trackers, the requests
+		// is set to ask for a compact list of peer by default. If the tracker
+		// does not support 'compact' - a list of peers will be returned as is
+		// described in the unofficial wiki.
 		HTTPTrackerRequestMessage message = new HTTPTrackerRequestMessage(
 				_session.getMetaInfo().getInfoHash(),
 				clientPeer.getIP(), clientPeer.getAddress().getPort(),
 				clientPeer.getPeerID(), sessionInfo.getUploaded(),
 				sessionInfo.getDownloaded(), sessionInfo.getLeft(),
-				1, 0, event, TrackerRequestMessage.DEFAULT_NUM_WANT, 0);
+				TrackerRequestMessage.DEFAULT_COMPACT, TrackerRequestMessage.DEFAULT_NO_PEER_ID,
+				event, TrackerRequestMessage.DEFAULT_NUM_WANT, 0);
 		try {
 			URL getRequest = message.formTrackerRequest(_trackerURI.toURL());
 			

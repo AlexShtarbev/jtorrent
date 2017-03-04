@@ -1,7 +1,6 @@
 package com.jtorrent.messaging.http;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -10,29 +9,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.jtorrent.announce.AnnounceException;
-import com.jtorrent.announce.messaging.TrackerRequestMessage;
-import com.jtorrent.announce.messaging.TrackerResponseMessage;
 import com.jtorrent.bencode.BDecoder;
 import com.jtorrent.bencode.BObject;
 import com.jtorrent.bencode.BObject.BEncodingException;
+import com.jtorrent.messaging.AnnounceException;
+import com.jtorrent.messaging.base.TrackerRequestMessage;
+import com.jtorrent.messaging.base.TrackerResponseMessage;
 import com.jtorrent.peer.Peer;
 import com.jtorrent.torrent.TorrentSession;
 
 public class HTTPTrackerResponseMessage extends TrackerResponseMessage{
-	public static final int COMPACT_PEER_LIST_VALUE_SIZE = 6;
-	public static final String FAILURE_REASON_KEY = "failure reason";
-	public static final String WARNING_MESSAGE_KEY = "warning message";
 	
-	private final String _failureReason;
-	private final String _warningMessage;
-	
-	public HTTPTrackerResponseMessage(String failureReason, String warningMessage, int interval, int complete, int incomplete, List<Peer> peers) {
-		super(interval, complete, incomplete, peers);
-		_failureReason = failureReason;
-		_warningMessage = warningMessage;
+	public HTTPTrackerResponseMessage(String failureReason, String warningMessage, int interval, int complete,
+			int incomplete, List<Peer> peers) {
+		super(failureReason, warningMessage, interval, complete, incomplete, peers);
 	}
 
+	public static final int COMPACT_PEER_LIST_VALUE_SIZE = 6;
+	
 	public static HTTPTrackerResponseMessage parse(ByteBuffer message) throws IOException, AnnounceException {
 		BObject decodedMessage = BDecoder.instance().decode(message);
 		if(decodedMessage == null) {
@@ -127,20 +121,12 @@ public class HTTPTrackerResponseMessage extends TrackerResponseMessage{
 		return peersList;
 	}
 	
-	public String getFailureReason() {
-		return _failureReason;
-	}
-
-	public String getWarningMessage() {
-		return _warningMessage;
-	}
-	
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("---- Tracker Response ----\n");
-		sb.append("\twarning message: " + _warningMessage + "\n");
-		sb.append("\tfailure reason: " + _failureReason + "\n");
+		sb.append("\twarning message: " + getWarningMessage() + "\n");
+		sb.append("\tfailure reason: " + getFailureReason() + "\n");
 		sb.append("\tinterval: " + getInterval() + "\n");
 		sb.append("\tcomplete: " + getComplete() + "\n");
 		sb.append("\tincomplete: " + getIncomplete()+ "\n");

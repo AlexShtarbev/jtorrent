@@ -1,8 +1,10 @@
-package com.jtorrent.announce;
+package com.jtorrent.messaging;
 
+import java.io.IOException;
 import java.net.URI;
 
-import com.jtorrent.announce.messaging.TrackerRequestEvent;
+import com.jtorrent.messaging.base.TrackerRequestEvent;
+import com.jtorrent.messaging.base.TrackerResponseMessage;
 import com.jtorrent.torrent.TorrentSession;
 
 public abstract class TrackerClient {
@@ -16,5 +18,5 @@ public abstract class TrackerClient {
 	
 	public void close(){};
 	
-	public abstract void queryTracker(TrackerRequestEvent event) throws AnnounceException;
+	public abstract TrackerResponseMessage queryTracker(TrackerRequestEvent event) throws AnnounceException, IOException;
 }

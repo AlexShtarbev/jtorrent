@@ -1,8 +1,11 @@
-package com.jtorrent.announce;
+package com.jtorrent.messaging;
 
+import java.io.IOException;
 import java.util.concurrent.*;
 
-import com.jtorrent.announce.messaging.TrackerRequestEvent;
+import com.jtorrent.messaging.base.ResponseException;
+import com.jtorrent.messaging.base.TrackerRequestEvent;
+import com.jtorrent.messaging.base.TrackerResponseMessage;
 import com.jtorrent.torrent.TorrentSession;
 
 // FIXME - add class comment
@@ -17,6 +20,9 @@ public class AnnounceService {
 	 */
 	private int _trackerInteral;
 	private boolean _stop;
+	/**
+	 * When the service is forcefully stopped - a STOP message needs to be sent to the tracker.
+	 */
 	private boolean _hardStop;
 	
 	public AnnounceService(TorrentSession session) {
@@ -41,12 +47,13 @@ public class AnnounceService {
 		if(interval < 0) {
 			stop(true);
 		} else {
-			_trackerInteral = interval;
+			setTrackerInteral(interval);
 		}
 	}
 	
 	public void stop(boolean shouldHardStop) throws InterruptedException {
 		_stop = true;
+		_hardStop = shouldHardStop;
 		if(!_announceService.isShutdown() && !_announceService.isTerminated()
 				&& ((ThreadPoolExecutor)_announceService).getActiveCount() != 0) {
 			_announceService.shutdownNow();
@@ -55,6 +62,14 @@ public class AnnounceService {
 		}
 	}
 	
+	public int getTrackerInteral() {
+		return _trackerInteral;
+	}
+
+	public void setTrackerInteral(int trackerInteral) {
+		this._trackerInteral = trackerInteral;
+	}
+
 	/**
 	 * The purpose of this task is to send the initial "started" event so
 	 * that the client can receive the list of peers from the .torrent 
@@ -62,6 +77,10 @@ public class AnnounceService {
 	 * updated about the usage of the torrent.
 	 * <br/>
 	 * The task is active so long as the service is being used by the client.
+	 * 
+	 * <br/>
+	 * If the service is to be stopped with a STOP message then such a message
+	 * is sent to the tracker.
 	 * @author Alex
 	 *
 	 */
@@ -72,21 +91,58 @@ public class AnnounceService {
 			TrackerRequestEvent trackerEvent = TrackerRequestEvent.STARTED;
 			while(!_stop) {
 				try {
-					_tierManager.provideTrackerClient().queryTracker(trackerEvent);
+					TrackerResponseMessage response = _tierManager.provideTrackerClient().queryTracker(trackerEvent);
 					_tierManager.moveTrackerToFront();
+					if(response != null) {
+						handleResponse(response);
+					}
 					trackerEvent = TrackerRequestEvent.NONE;
 				} catch (AnnounceException e) {
 					// TODO log
 					_tierManager.tryNextTrackerClient();
+				} catch (IOException e) {
+					// TODO log
+				} catch (ResponseException e) {
+					// TODO log
 				}
 				
 				try {
-					TimeUnit.SECONDS.sleep(1);
+					TimeUnit.SECONDS.sleep(_trackerInteral);
 				} catch (InterruptedException e) {
 					// Not a problem - the task is not doing anything intensive
 					// or has a state worth saving.
 				}
 			}
-		}		
+			
+			if(_hardStop) {
+				sendStopRequest();
+			}
+		}
+		
+		private void handleResponse(TrackerResponseMessage message) throws ResponseException {
+			if(message.getFailureReason() != null && !message.getFailureReason().isEmpty()) {
+				throw new ResponseException(message.getFailureReason());
+			}
+			setTrackerInteral(message.getInterval());
+			_session.handleTrackerResponse(message);
+		}
+		
+		private void sendStopRequest() {
+			if(!_announceService.isShutdown() && !_announceService.isTerminated()) {
+				// Send the request after a small delay.
+				try {
+					TimeUnit.MILLISECONDS.sleep(500);
+				} catch (InterruptedException e) {
+					// Nothing to do
+				}
+				try {
+					_tierManager.provideTrackerClient().queryTracker(TrackerRequestEvent.STOPPED);
+				} catch (AnnounceException e) {
+					// TODO log
+				} catch (IOException e) {
+					// TODO log
+				}
+			}
+		}
 	}
 }

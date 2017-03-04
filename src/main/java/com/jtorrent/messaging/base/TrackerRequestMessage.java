@@ -1,8 +1,4 @@
-package com.jtorrent.announce.messaging;
-
-import java.nio.ByteBuffer;
-
-import com.jtorrent.peer.Peer;
+package com.jtorrent.messaging.base;
 
 /**
  * An abstract class that defines the format of the request message to the tracker.
@@ -26,6 +22,8 @@ public abstract class TrackerRequestMessage {
 	public static final String KEY_KEY = "key";
 	
 	public static final int DEFAULT_NUM_WANT = 50;
+	public static final int DEFAULT_COMPACT = 1;
+	public static final int DEFAULT_NO_PEER_ID = 0;
 	
 	private final byte[] _infoHash;
 	private final String _ip;
@@ -34,7 +32,21 @@ public abstract class TrackerRequestMessage {
 	private final long _uploaded;
 	private final long _downloaded;
 	private final long _left;
+	/**
+	 * Setting this to 1 indicates that the client accepts a compact response. 
+	 * The peers list is replaced by a peers string with 6 bytes per peer. 
+	 * The first four bytes are the host (in network byte order), the last two
+	 *  bytes are the port (again in network byte order). It should be noted 
+	 * that some trackers only support compact responses (for saving bandwidth)  
+	 * and either refuse requests without "compact=1" or simply send a compact
+	 * response unless the request contains "compact=0" (in which case they will
+	 * refuse the request.)
+	 */
 	private final int _compact;
+	/**
+	 *  Indicates that the tracker can omit peer id field in peers dictionary. 
+	 *  This option is ignored if compact is enabled.
+	 */
 	private final int _noPeerID;
 	private final TrackerRequestEvent _requestEvent;
 	private final int _numWant;

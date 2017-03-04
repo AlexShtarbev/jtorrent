@@ -1,4 +1,4 @@
-package com.jtorrent.announce;
+package com.jtorrent.messaging;
 
 import java.net.URI;
 import java.util.ArrayList;
