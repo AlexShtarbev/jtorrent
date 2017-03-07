@@ -11,9 +11,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jtorrent.messaging.conn.ConnectionService;
 import com.jtorrent.peer.Peer;
+
+import ch.qos.logback.core.util.TimeUtil;
 
 /**
  * This is experimental 
@@ -23,6 +29,9 @@ public class TorrentClient {
 
 	private ConnectionService _connectionService;
 	private ExecutorService _sessionExecutor;
+	
+	// see https://logback.qos.ch/manual/introduction.html
+	private static final Logger _logger = LoggerFactory.getLogger(TorrentClient.class);
 	
 	public TorrentClient() {
 		_connectionService = new ConnectionService();	
@@ -71,24 +80,24 @@ public class TorrentClient {
 						_connectionService);
 				ts.startSession();
 				try {
-					Thread.sleep(20000);
+					TimeUnit.MINUTES.sleep(2);
 					ts.stopSession();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					// TODO log
 					e.printStackTrace();
 				}
 				return true;
 			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
+				// TODO log
 				e.printStackTrace();
 			} catch (InvalidAlgorithmParameterException e) {
-				// TODO Auto-generated catch block
+				// TODO log
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// TODO log
 				e.printStackTrace();
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
+				// TODO log
 				e.printStackTrace();
 			}
 
@@ -106,7 +115,7 @@ public class TorrentClient {
 		//Future<Boolean> result2 = es.submit(new SessionTask(clientPeer, "D:/Movie/t1.torrent", "D:/Movie/dir"));
 		TorrentClient client = new TorrentClient();
 		try {
-			client.registerNewSession("D:/Movie/t2.torrent", "D:/Movie/dir");
+			client.registerNewSession("D:/Movie/assas.torrent", "D:/Movie/dir");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

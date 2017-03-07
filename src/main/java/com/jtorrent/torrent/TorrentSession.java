@@ -37,6 +37,7 @@ public class TorrentSession {
 	public void stopSession() {
 		try {
 			_announceService.stop(false);
+			_peerManager.cleanup();
 		} catch (InterruptedException e) {
 			// Ignore.
 		}

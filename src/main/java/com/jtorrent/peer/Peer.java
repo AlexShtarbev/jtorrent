@@ -3,6 +3,7 @@ package com.jtorrent.peer;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 
 public class Peer {
@@ -86,12 +87,17 @@ public class Peer {
 		return _host;
 	}
 	
-	public void setChannel(SocketChannel socketChannel) {
-		releaseChannel();
+	public void bind(SocketChannel socketChannel) throws SocketException {
+		release();
 		//TODO - implement - equivalent of SharingPeer.bind()
 	}
 	
-	public void releaseChannel() {
+	public void release() {
 		// TODO - implement - equivalent of SharingPeer.unbind()
+	}
+	
+	public boolean isConnected() {
+		// TODO - implement - equivalent of SharingPeer.isConnected()
+		return false;
 	}
 }

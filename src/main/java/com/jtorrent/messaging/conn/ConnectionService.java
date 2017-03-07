@@ -3,7 +3,6 @@ package com.jtorrent.messaging.conn;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Callable;
@@ -11,14 +10,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jtorrent.peer.Peer;
+import com.jtorrent.torrent.TorrentClient;
 import com.jtorrent.torrent.TorrentSession;
 
 public class ConnectionService {
+	
+	private static final Logger _logger = LoggerFactory.getLogger(ConnectionService.class);
 	
 	// The BitTorrent specification states that the range of the ports should be 
 	// 6881-6889 TCP. However, the client can use basically any ephemeral port:
@@ -99,6 +104,7 @@ public class ConnectionService {
 		return _outboundConnectionService.submit(new OutboundConnectionTask(peer, session));
 	}
 	
+	// TODO - P0 implement after implementing the downloading features
 	private class InboundConnectionsTask implements Runnable {
 		
 		@Override
@@ -132,34 +138,50 @@ public class ConnectionService {
 		
 		@Override
 		public HandshakeResponse call() {
+			SocketChannel channel = null;
 			try {
-				SocketChannel channel = SocketChannel.open(_peer.getAddress());
+				channel = SocketChannel.open(_peer.getAddress());
+				_logger.debug("Trying to connect to {}", _peer);
 				while(!channel.isConnected()) {
 					TimeUnit.MILLISECONDS.sleep(10);
 				}
 				// The channel needs to wait for the handshake response from the peer.
 				channel.configureBlocking(true);
+				_logger.debug("Sending handshake to {}", _peer);
 				channel.write(HandshakeMessage.make(_session.getMetaInfo().getInfoHash(),
 						_jtorrentPeerID));
+				_logger.debug("Received handshake from {}", _peer);
 				HandshakeMessage handshake = HandshakeMessage.validate(_session, channel, _peer.getPeerID());
-				return new HandshakeResponse(handshake, channel);
-			} catch (IOException | InterruptedException e) {
-				// TODO log
-			} catch (HandshakeException e) {
-				// TODO log
-				System.err.println(e);
+				return new HandshakeResponse(handshake, channel, _peer);
+			
+			} catch (IOException | InterruptedException | HandshakeException e) {
+				_logger.debug("Could not connect to {}. Reason: ", _peer, e.getMessage());
+				if(channel != null && channel.isConnected()) {
+					IOUtils.closeQuietly(channel);
+				}
+				return new HandshakeResponse(null, null, _peer, e);
 			}
-			return null;
 		}		
 	}
 	
 	public static class HandshakeResponse {
 		private final HandshakeMessage _handshakeMessage;
 		private final SocketChannel _socketChannel;
+		private Exception _e;
+		/**
+		 * The peer we are trying to connect to.
+		 */
+		private Peer _tryPeer;
 		
-		public HandshakeResponse(HandshakeMessage hm, SocketChannel sc) {
+		public HandshakeResponse(HandshakeMessage hm, SocketChannel sc, Peer peer) {
+			this(hm, sc, peer, null);
+		}
+		
+		public HandshakeResponse(HandshakeMessage hm, SocketChannel sc, Peer peer, Exception e) {			
 			_handshakeMessage = hm;
 			_socketChannel = sc;
+			_e = e;
+			_tryPeer = peer;
 		}
 		
 		public HandshakeMessage getHandshakeMessage() {
@@ -168,6 +190,18 @@ public class ConnectionService {
 		
 		public SocketChannel getSocketChannel() {
 			return _socketChannel;
+		}
+		
+		public Exception getError() {
+			return _e;
+		}
+		
+		/**
+		 * 
+		 * @return The peer that the client tried to connect to.
+		 */
+		public Peer getTryPeer() {
+			return _tryPeer;
 		}
 	}
 }
