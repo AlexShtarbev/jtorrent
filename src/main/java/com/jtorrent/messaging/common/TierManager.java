@@ -1,10 +1,12 @@
-package com.jtorrent.messaging;
+package com.jtorrent.messaging.common;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.jtorrent.messaging.http.HTTPTrackerClient;
+import com.jtorrent.messaging.udp.UDPTrackerClient;
 import com.jtorrent.torrent.TorrentSession;
 
 /**

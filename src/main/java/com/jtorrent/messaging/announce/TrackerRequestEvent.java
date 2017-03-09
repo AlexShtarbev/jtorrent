@@ -1,4 +1,4 @@
-package com.jtorrent.messaging.base;
+package com.jtorrent.messaging.announce;
 
 /**
  * <p>

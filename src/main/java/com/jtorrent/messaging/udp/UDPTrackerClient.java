@@ -1,9 +1,10 @@
-package com.jtorrent.messaging;
+package com.jtorrent.messaging.udp;
 
 import java.net.URI;
 
-import com.jtorrent.messaging.base.TrackerRequestEvent;
-import com.jtorrent.messaging.base.TrackerResponseMessage;
+import com.jtorrent.messaging.announce.TrackerRequestEvent;
+import com.jtorrent.messaging.announce.TrackerResponseMessage;
+import com.jtorrent.messaging.common.TrackerClient;
 import com.jtorrent.torrent.TorrentSession;
 
 public class UDPTrackerClient extends TrackerClient {

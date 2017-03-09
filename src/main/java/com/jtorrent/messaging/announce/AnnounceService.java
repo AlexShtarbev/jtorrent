@@ -1,11 +1,9 @@
-package com.jtorrent.messaging;
+package com.jtorrent.messaging.announce;
 
 import java.io.IOException;
 import java.util.concurrent.*;
 
-import com.jtorrent.messaging.base.ResponseException;
-import com.jtorrent.messaging.base.TrackerRequestEvent;
-import com.jtorrent.messaging.base.TrackerResponseMessage;
+import com.jtorrent.messaging.common.TierManager;
 import com.jtorrent.torrent.TorrentSession;
 
 // FIXME - add class comment

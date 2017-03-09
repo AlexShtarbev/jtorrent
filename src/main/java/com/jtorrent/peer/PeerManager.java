@@ -4,24 +4,20 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jtorrent.messaging.conn.ConnectionService;
-import com.jtorrent.messaging.conn.ConnectionService.HandshakeResponse;
-import com.jtorrent.messaging.conn.HandshakeMessage;
+import com.jtorrent.messaging.announce.ConnectionService;
+import com.jtorrent.messaging.announce.HandshakeMessage;
+import com.jtorrent.messaging.announce.ConnectionService.HandshakeResponse;
 import com.jtorrent.torrent.TorrentSession;
 
 /**
@@ -36,13 +32,10 @@ public class PeerManager {
 	private static final Logger _logger = LoggerFactory.getLogger(PeerManager.class);
 	
 	/**
-	 * A list of all the peers returned from the tracker.
+	 * <p>A  &lt; IP:port, Peer &gt; map.</p>
+	 * <b>NOTE:</b> each peers has a mandatory ip:port host address and so this map
+	 * is guaranteed to have all unique peers that we want to connect to.
 	 */
-	private List<Peer> _peerList;
-	/**
-	 * Ssed to make sure the manager has repeating peer addresses in its list.
-	 */
-	private Set<String> _peerSet;
 	private Map<String, Peer> _addressToPeerMap;
 	private Map<String, Peer> _idToPeerMap;
 	
@@ -50,13 +43,10 @@ public class PeerManager {
 	private Map<String, Peer> _connectedPeersMap;
 	
 	private final ConnectionService _connectionService;
-	private final TorrentSession _torrentSession;
-	
+	private final TorrentSession _torrentSession;	
 	private final ExecutorService _registerService;
 	
 	public PeerManager(ConnectionService connService, TorrentSession session) {
-		_peerList = new ArrayList<>();
-		_peerSet = new HashSet<>();
 		_addressToPeerMap = new HashMap<String, Peer>();
 		_idToPeerMap = new HashMap<String, Peer>();
 		
@@ -69,10 +59,6 @@ public class PeerManager {
 	
 	public void cleanup() {
 		_registerService.shutdown();
-	}
-
-	public synchronized List<Peer> getPeers() {
-		return _peerList;
 	}
 	
 	public synchronized void addAll(List<Peer> peerList) {
@@ -87,11 +73,10 @@ public class PeerManager {
 	 * @param peer
 	 */
 	public synchronized void add(Peer peer) {
-		if (_peerSet.contains(peer.getHostAddress())) {
+		if (_addressToPeerMap.containsKey(peer.getHostAddress())) {
 			return;
 		}
-		_peerList.add(peer);
-		_peerSet.add(peer.getHostAddress());
+		
 		_addressToPeerMap.put(peer.getHostAddress(), peer);
 		if(peer.getHexPeerID() != null && !peer.getHostAddress().isEmpty()) {
 			_idToPeerMap.put(peer.getHexPeerID(), peer);
@@ -141,12 +126,14 @@ public class PeerManager {
 	 * @param channel The channel to which to peer is to be bound
 	 */
 	public void registerConnection(Peer tryPeer, SocketChannel channel) {
+		// See if we hate the peer in the list of peers. If not - add it.
+		// When the client fails connect to a peer, the peer is removed
 		Peer peer = get(tryPeer);
 		if (peer == null) {
 			peer = tryPeer;
 			add(peer);
 		}
-		// TODO - see if peer exists
+		_logger.info("Trying to register {}...", peer);
 		synchronized (_connectedLockObject) {
 			try {
 			if(peer.isConnected()) {
@@ -165,7 +152,7 @@ public class PeerManager {
 			_idToPeerMap.put(peer.getPeerID(), peer);
 			_logger.debug("registered {}", peer);
 			} catch (SocketException e) {
-				// TODO log
+				_logger.warn("Could not register new peer {}. Reason: {}", peer, e.getMessage());
 				_connectedPeersMap.remove(peer.getHexPeerID());
 			}
 		}
@@ -178,7 +165,7 @@ public class PeerManager {
 	public void registerConnectionAll(List<Peer> peers) {
 		addAll(peers);
 		ArrayList<Future<HandshakeResponse>> results = new ArrayList<Future<HandshakeResponse>>();
-		for(Peer peer : _peerList) {
+		for(Peer peer : _addressToPeerMap.values()) {
 			results.add(_connectionService.connect(_torrentSession, peer));
 		}
 		
@@ -187,7 +174,7 @@ public class PeerManager {
 		}
 	}
 	
-	private void handleHandshakeError(Exception e, Peer p) {
+	private void handleHandshakeUnsuccessful(Exception e, Peer p) {
 		_logger.debug("An error {} occured while handshaking with {}", p, e.getMessage());
 		_addressToPeerMap.remove(p.getHostAddress());
 		if(p.getPeerID() != null) {
@@ -217,7 +204,7 @@ public class PeerManager {
 			try {
 				handshakeResponse = _future.get();
 				if(handshakeResponse.getError() != null) {
-					handleHandshakeError(handshakeResponse.getError(), handshakeResponse.getTryPeer());
+					handleHandshakeUnsuccessful(handshakeResponse.getError(), handshakeResponse.getTryPeer());
 					return;
 				}
 				// Extract the communication socket channel and the handshake response.
@@ -231,9 +218,7 @@ public class PeerManager {
 				_logger.debug("Registriation interrupted: {}", e.getMessage());
 			} catch (ExecutionException e) {
 				_logger.debug("Unable to retrieve result from future {}", e.getMessage());
-			}/* catch (TimeoutException e) {
-				_logger.debug("timeout {}", e);
-			}	*/
+			}
 		}		
 	}
 }

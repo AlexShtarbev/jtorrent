@@ -6,9 +6,9 @@ import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 
-import com.jtorrent.messaging.AnnounceService;
-import com.jtorrent.messaging.base.TrackerResponseMessage;
-import com.jtorrent.messaging.conn.ConnectionService;
+import com.jtorrent.messaging.announce.AnnounceService;
+import com.jtorrent.messaging.announce.ConnectionService;
+import com.jtorrent.messaging.announce.TrackerResponseMessage;
 import com.jtorrent.metainfo.MetaInfo;
 import com.jtorrent.peer.Peer;
 import com.jtorrent.peer.PeerManager;

@@ -1,4 +1,4 @@
-package com.jtorrent.messaging;
+package com.jtorrent.messaging.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,11 +11,11 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import com.jtorrent.messaging.base.TrackerRequestEvent;
-import com.jtorrent.messaging.base.TrackerRequestMessage;
-import com.jtorrent.messaging.base.TrackerResponseMessage;
-import com.jtorrent.messaging.http.HTTPTrackerRequestMessage;
-import com.jtorrent.messaging.http.HTTPTrackerResponseMessage;
+import com.jtorrent.messaging.announce.AnnounceException;
+import com.jtorrent.messaging.announce.TrackerRequestEvent;
+import com.jtorrent.messaging.announce.TrackerRequestMessage;
+import com.jtorrent.messaging.announce.TrackerResponseMessage;
+import com.jtorrent.messaging.common.TrackerClient;
 import com.jtorrent.peer.Peer;
 import com.jtorrent.torrent.*;
 

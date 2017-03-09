@@ -16,10 +16,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jtorrent.messaging.conn.ConnectionService;
+import com.jtorrent.messaging.announce.ConnectionService;
 import com.jtorrent.peer.Peer;
-
-import ch.qos.logback.core.util.TimeUtil;
 
 /**
  * This is experimental 

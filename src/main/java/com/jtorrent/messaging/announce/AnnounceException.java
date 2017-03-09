@@ -1,4 +1,4 @@
-package com.jtorrent.messaging;
+package com.jtorrent.messaging.announce;
 
 public class AnnounceException extends Exception {
 	

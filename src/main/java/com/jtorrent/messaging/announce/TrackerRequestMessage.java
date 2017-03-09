@@ -1,4 +1,4 @@
-package com.jtorrent.messaging.base;
+package com.jtorrent.messaging.announce;
 
 /**
  * An abstract class that defines the format of the request message to the tracker.

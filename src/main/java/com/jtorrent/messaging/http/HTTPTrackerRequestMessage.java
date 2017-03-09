@@ -5,8 +5,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import com.jtorrent.messaging.base.TrackerRequestEvent;
-import com.jtorrent.messaging.base.TrackerRequestMessage;
+import com.jtorrent.messaging.announce.TrackerRequestEvent;
+import com.jtorrent.messaging.announce.TrackerRequestMessage;
 import com.jtorrent.torrent.TorrentSession;
 
 public class HTTPTrackerRequestMessage extends TrackerRequestMessage {

@@ -1,10 +1,11 @@
-package com.jtorrent.messaging;
+package com.jtorrent.messaging.common;
 
 import java.io.IOException;
 import java.net.URI;
 
-import com.jtorrent.messaging.base.TrackerRequestEvent;
-import com.jtorrent.messaging.base.TrackerResponseMessage;
+import com.jtorrent.messaging.announce.AnnounceException;
+import com.jtorrent.messaging.announce.TrackerRequestEvent;
+import com.jtorrent.messaging.announce.TrackerResponseMessage;
 import com.jtorrent.torrent.TorrentSession;
 
 public abstract class TrackerClient {

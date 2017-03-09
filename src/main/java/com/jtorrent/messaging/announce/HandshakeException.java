@@ -1,4 +1,4 @@
-package com.jtorrent.messaging.conn;
+package com.jtorrent.messaging.announce;
 
 public class HandshakeException extends Exception {
 	private static final long serialVersionUID = 1L;

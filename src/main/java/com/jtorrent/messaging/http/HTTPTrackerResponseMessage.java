@@ -12,9 +12,9 @@ import java.util.Map;
 import com.jtorrent.bencode.BDecoder;
 import com.jtorrent.bencode.BObject;
 import com.jtorrent.bencode.BObject.BEncodingException;
-import com.jtorrent.messaging.AnnounceException;
-import com.jtorrent.messaging.base.TrackerRequestMessage;
-import com.jtorrent.messaging.base.TrackerResponseMessage;
+import com.jtorrent.messaging.announce.AnnounceException;
+import com.jtorrent.messaging.announce.TrackerRequestMessage;
+import com.jtorrent.messaging.announce.TrackerResponseMessage;
 import com.jtorrent.peer.Peer;
 import com.jtorrent.torrent.TorrentSession;
 

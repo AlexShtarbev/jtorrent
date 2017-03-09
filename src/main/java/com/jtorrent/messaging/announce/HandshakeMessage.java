@@ -1,4 +1,4 @@
-package com.jtorrent.messaging.conn;
+package com.jtorrent.messaging.announce;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

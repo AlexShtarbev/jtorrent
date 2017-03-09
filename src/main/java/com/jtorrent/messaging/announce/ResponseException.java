@@ -1,4 +1,4 @@
-package com.jtorrent.messaging.base;
+package com.jtorrent.messaging.announce;
 
 public class ResponseException extends Exception{
 	private static final long serialVersionUID = 1L;

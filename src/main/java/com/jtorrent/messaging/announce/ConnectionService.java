@@ -1,4 +1,4 @@
-package com.jtorrent.messaging.conn;
+package com.jtorrent.messaging.announce;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,6 +21,7 @@ import com.jtorrent.peer.Peer;
 import com.jtorrent.torrent.TorrentClient;
 import com.jtorrent.torrent.TorrentSession;
 
+// FIXME - add comment
 public class ConnectionService {
 	
 	private static final Logger _logger = LoggerFactory.getLogger(ConnectionService.class);
