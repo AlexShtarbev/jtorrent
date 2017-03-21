@@ -7,22 +7,23 @@ import java.util.Map;
 
 public class BEncoder implements IEncode {
 	private static BEncoder _instance;
-	
-	private BEncoder() {}
-	
+
+	private BEncoder() {
+	}
+
 	public static BEncoder instance() {
-		if(_instance == null) {
+		if (_instance == null) {
 			_instance = new BEncoder();
 		}
-		
+
 		return _instance;
 	}
 
 	public void encode(Object o, OutputStream out) throws IOException {
 		if (o instanceof BObject) {
-			o = ((BObject)o).asObject();
-		} 
-		
+			o = ((BObject) o).asObject();
+		}
+
 		IEncode encoder = null;
 		if (o instanceof String || o instanceof byte[]) {
 			encoder = BByteStringCoder.instance();
@@ -35,7 +36,7 @@ public class BEncoder implements IEncode {
 		} else {
 			throw new IllegalArgumentException("unsupported type " + o.getClass());
 		}
-		
+
 		encoder.encode(o, out);
 	}
 }

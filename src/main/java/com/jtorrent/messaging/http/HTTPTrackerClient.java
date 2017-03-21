@@ -19,7 +19,7 @@ import com.jtorrent.messaging.common.TrackerClient;
 import com.jtorrent.peer.Peer;
 import com.jtorrent.torrent.*;
 
-public class HTTPTrackerClient extends TrackerClient{
+public class HTTPTrackerClient extends TrackerClient {
 
 	public HTTPTrackerClient(TorrentSession session, URI trackerURI) {
 		super(session, trackerURI);
@@ -28,16 +28,14 @@ public class HTTPTrackerClient extends TrackerClient{
 	@Override
 	public TrackerResponseMessage queryTracker(TrackerRequestEvent event) throws AnnounceException, IOException {
 		InputStream in = send(event);
-		if(in == null){
+		if (in == null) {
 			throw new AnnounceException("got no response from tracker");
 		}
-		
+
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			out.write(in);
-			//FIXME
-			System.out.println("received response from tracker " + _trackerURI);
-			//System.out.println(_trackerURI.toString() + out.toString());
+			// System.out.println(_trackerURI.toString() + out.toString());
 			ByteBuffer responseMessageBuffer = ByteBuffer.wrap(out.toByteArray());
 			HTTPTrackerResponseMessage response = HTTPTrackerResponseMessage.parse(responseMessageBuffer);
 			// FIXME
@@ -54,7 +52,7 @@ public class HTTPTrackerClient extends TrackerClient{
 			}
 		}
 	}
-	
+
 	private InputStream send(TrackerRequestEvent event) throws AnnounceException {
 		Peer clientPeer = _session.getSessionInfo().getClientPeer();
 		SessionInfo sessionInfo = _session.getSessionInfo();
@@ -63,21 +61,19 @@ public class HTTPTrackerClient extends TrackerClient{
 		// is set to ask for a compact list of peer by default. If the tracker
 		// does not support 'compact' - a list of peers will be returned as is
 		// described in the unofficial wiki.
-		HTTPTrackerRequestMessage message = new HTTPTrackerRequestMessage(
-				_session.getMetaInfo().getInfoHash(),
-				clientPeer.getIP(), clientPeer.getAddress().getPort(),
-				clientPeer.getPeerID(), sessionInfo.getUploaded(),
-				sessionInfo.getDownloaded(), sessionInfo.getLeft(),
-				TrackerRequestMessage.DEFAULT_COMPACT, TrackerRequestMessage.DEFAULT_NO_PEER_ID,
-				event, TrackerRequestMessage.DEFAULT_NUM_WANT, 0);
+		HTTPTrackerRequestMessage message = new HTTPTrackerRequestMessage(_session.getMetaInfo().getInfoHash(),
+				clientPeer.getIP(), clientPeer.getAddress().getPort(), clientPeer.getPeerID(),
+				sessionInfo.getUploaded(), sessionInfo.getDownloaded(), sessionInfo.getLeft(),
+				TrackerRequestMessage.DEFAULT_COMPACT, TrackerRequestMessage.DEFAULT_NO_PEER_ID, event,
+				TrackerRequestMessage.DEFAULT_NUM_WANT, 0);
 		try {
 			URL getRequest = message.formTrackerRequest(_trackerURI.toURL());
-			
+
 			HttpURLConnection conn = (HttpURLConnection) getRequest.openConnection();
-			if(conn == null){
+			if (conn == null) {
 				throw new AnnounceException("could not open connection to target traker");
 			}
-			
+
 			return conn.getInputStream();
 		} catch (UnsupportedEncodingException e) {
 			throw new AnnounceException("could not bencode data");

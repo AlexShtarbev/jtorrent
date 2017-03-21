@@ -10,9 +10,9 @@ import java.util.Map;
 
 public class BObject {
 	public static final String BYTE_ENCODING = "UTF-8";
-	
+
 	private final Object _bobj;
-	
+
 	public BObject(byte[] bytes) {
 		_bobj = bytes;
 	}
@@ -65,10 +65,10 @@ public class BObject {
 
 	public byte[] asBytes() throws BEncodingException {
 		try {
-			if(_bobj instanceof BigInteger) {
-				return ((BigInteger)_bobj).toString().getBytes();
+			if (_bobj instanceof BigInteger) {
+				return ((BigInteger) _bobj).toString().getBytes();
 			} else {
-				return (byte[])_bobj;
+				return (byte[]) _bobj;
 			}
 		} catch (ClassCastException cce) {
 			throw new BEncodingException(cce.toString());
@@ -77,7 +77,7 @@ public class BObject {
 
 	public Number asNumber() throws BEncodingException {
 		try {
-			return (Number)_bobj;
+			return (Number) _bobj;
 		} catch (ClassCastException cce) {
 			throw new BEncodingException(cce.toString());
 		}
@@ -98,7 +98,7 @@ public class BObject {
 	@SuppressWarnings("unchecked")
 	public List<BObject> asList() throws BEncodingException {
 		if (_bobj instanceof ArrayList) {
-			return (ArrayList<BObject>)_bobj;
+			return (ArrayList<BObject>) _bobj;
 		} else {
 			throw new BEncodingException("Excepted List<BObject>, got " + _bobj.getClass().getCanonicalName());
 		}
@@ -107,12 +107,12 @@ public class BObject {
 	@SuppressWarnings("unchecked")
 	public Map<String, BObject> asMap() throws BEncodingException {
 		if (_bobj instanceof HashMap) {
-			return (Map<String, BObject>)_bobj;
+			return (Map<String, BObject>) _bobj;
 		} else {
 			throw new BEncodingException("Expected Map<String, BObject>, got " + _bobj.getClass().getCanonicalName());
 		}
 	}
-	
+
 	public static class BEncodingException extends IOException {
 
 		public static final long serialVersionUID = -1;

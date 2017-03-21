@@ -10,7 +10,7 @@ public class SessionInfo {
 	 * The torrent client is also a peer.
 	 */
 	private final Peer _clientPeer;
-	
+
 	public SessionInfo(Peer clientPeer) {
 		_clientPeer = clientPeer;
 	}
@@ -42,5 +42,5 @@ public class SessionInfo {
 	public Peer getClientPeer() {
 		return _clientPeer;
 	}
-	
+
 }

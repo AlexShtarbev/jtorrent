@@ -1,0 +1,406 @@
+2017-03-20 21:27:43 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - Trying to connect to  - 2017-03-20 21:27:43 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - Trying to connect to 46.253.2.47:53641 null
+2017-03-20 21:27:43 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - Sending handshake to  - 2017-03-20 21:27:43 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - Sending handshake to 46.253.2.47:53641 null
+2017-03-20 21:27:43 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - sent 68 bytes handshake to  - 2017-03-20 21:27:43 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - sent 68 bytes handshake to 46.253.2.47:53641 null
+2017-03-20 21:27:44 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - Received handshake from  - 2017-03-20 21:27:44 [pool-1-thread-25] DEBUG c.j.m.announce.ConnectionService - Received handshake from 46.253.2.47:53641 null
+2017-03-20 21:27:44 [pool-4-thread-49] INFO  com.jtorrent.peer.PeerManager - Trying to register  - 2017-03-20 21:27:44 [pool-4-thread-49] INFO  com.jtorrent.peer.PeerManager - Trying to register 46.253.2.47:53641 -UT3490-|©ÀÅH\?â:ÉBû...
+2017-03-20 21:27:44 [pool-4-thread-49] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-4-thread-49] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 unbinding
+2017-03-20 21:27:44 [pool-4-thread-49] DEBUG com.jtorrent.storage.PieceRepository - unfollowed peer / - 2017-03-20 21:27:44 [pool-4-thread-49] DEBUG com.jtorrent.storage.PieceRepository - unfollowed peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-4-thread-49] DEBUG com.jtorrent.peer.PeerManager - YAAAAAAAAAY - registered  - 2017-03-20 21:27:44 [pool-4-thread-49] DEBUG com.jtorrent.peer.PeerManager - YAAAAAAAAAY - registered 46.253.2.47:53641 -UT3490-|©ÀÅH\?â:ÉBû
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=726> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=726> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received BITFIELD message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received BITFIELD from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received BITFIELD from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 has 0 available pieces.
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - followed peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - followed peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Am Interested in peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Am Interested in peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer / - 2017-03-20 21:27:44 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer /46.253.2.47:53641 is trying to send 5 bytes INTERESTED message
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 5 bytes INTERESTED to peer / - 2017-03-20 21:27:44 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 5 bytes INTERESTED to peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=5> from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received HAVE message...
+2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received HAVE from peer /46.253.2.47:53641
+2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer / - 2017-03-20 21:27:44 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /46.253.2.47:53641...
+...
+2017-03-20 21:27:47 [pool-4-thread-18] DEBUG com.jtorrent.peer.Peer - Peer /79.100.36.206:19604 unbinding
+2017-03-20 21:27:47 [pool-4-thread-18] DEBUG com.jtorrent.storage.PieceRepository - unfollowed peer /79.100.36.206:19604
+2017-03-20 21:27:47 [pool-4-thread-18] DEBU
+2017-03-20 21:27:47 [pool-41-thread-2] INFO  com.jtorrent.peer.MessageChannel - Trying to read from peer /79.100.36.206:19604...
+2017-03-20 21:27:47 [pool-41-thread-2] DEBUG com.jtorrent.peer.Message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received UNCHOKE from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - received UNCHOKE from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 asking for new pi
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - chose piece 5703 for peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - chose piece 5703 for peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 5 blocks (81920 last) with 0 remaining block for piece 5703(262144)
+2017-03-20 21:27:59 [pool-38-thread-2] INFO  com.jtorrent.peer.MessageCh
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 5 blocks (81920 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageCh
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer /46.253.2.47:53641 is trying to send 17 bytes REQUEST mess
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer /46.253.2.47:53641 is trying to send 17 bytes REQUEST mess
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer /46.253.2.47:53641 is trying to send 17 bytes REQUEST mess
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer /46.253.2.47:53641 is trying to send 17 bytes REQUEST mess
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 0 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 0; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 0 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Send
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (98304 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageCh
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 16384 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 16384; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 16384 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - 
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (114688 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 32768 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 32768; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 32768 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - 
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (131072 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer /46.253.2.47:53641 is trying to send 17 bytes REQUEST mess
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 49152 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 49152; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 49152 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - 
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (147456 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 65536 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 65536; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 65536 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - 
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (163840 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 81920 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 81920; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 81920 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - 
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (180224 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 98304 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 98304; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 98304 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - 
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (196608 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 114688 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 114688; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 114688 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (212992 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 131072 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 131072; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 131072 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (229376 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 147456 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 147456; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 147456 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (245760 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 163840 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 163840; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 163840 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (262144 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 180224 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 180224; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 180224 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (262144 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 196608 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 196608; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 196608 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (262144 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 212992 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 212992; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 212992 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (262144 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 229376 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 229376; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 229376 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (262144 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.MessageChannel - Trying to read message with <len=16393> from peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received PIECE message
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 245760 - blocks in flight for piece 5703 are 4
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Received block 245760; asking for more blocks from peer
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Completed block # 245760 - blocks in flight for piece 5703 are 4
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository -
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - Sending 1 blocks (262144 last) with 0 remaining block for piece 5703(262144)
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageC
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Sent 17 bytes REQUEST to peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 received exception from message channel: unexpected end of stream while reading with 0 read so far / reamining 
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 unbind
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - unfollowed peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.storage.PieceRepository - unfollowed peer /46.253.2.47:53
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Notififying peer manager...
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.PeerManager - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] D
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Notififying peer manager...
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 20
+
+2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer / - 2017-03-20 21:27:59 [pool-38-thread-2] DEBUG com.jtorrent.peer.Peer - Peer /46.253.2.47:53641 closed its message chan
+
+2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer / - 2017-03-20 21:27:59 [pool-38-thread-1] DEBUG com.jtorrent.peer.MessageChannel - Peer /46.253.2.47:53641 is trying to send 5 bytes NOT_INTERESTED mess

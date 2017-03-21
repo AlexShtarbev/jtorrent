@@ -16,8 +16,15 @@ public abstract class TrackerClient {
 		_session = session;
 		_trackerURI = trackerURI;
 	}
+
+	public void close() {
+	};
+
+	public abstract TrackerResponseMessage queryTracker(TrackerRequestEvent event)
+			throws AnnounceException, IOException;
 	
-	public void close(){};
-	
-	public abstract TrackerResponseMessage queryTracker(TrackerRequestEvent event) throws AnnounceException, IOException;
+	@Override
+	public String toString() {
+		return _trackerURI.toString();
+	}
 }

@@ -11,15 +11,15 @@ import com.jtorrent.bencode.BObject.BEncodingException;
 public class FileDictionary {
 	public static final String PATH_KEY = "path";
 	public static final String LENGHT_KEY = "length";
-	
+
 	private final File _file;
 	private final long _length;
-	
+
 	public FileDictionary(String name, String parentDir, long length) {
-		_file = new File(parentDir, name);
+		_file = new File(name, parentDir);
 		_length = length;
 	}
-	
+
 	public FileDictionary(String name, long length) {
 		_file = new File(name);
 		_length = length;
@@ -32,26 +32,26 @@ public class FileDictionary {
 	public long getLength() {
 		return _length;
 	}
-	
+
 	public static List<FileDictionary> fromFiles(String dirName, List<BObject> filesList) throws BEncodingException {
 		List<FileDictionary> fileDictList = new ArrayList<FileDictionary>();
-		for(BObject file : filesList) {
+		for (BObject file : filesList) {
 			Map<String, BObject> info = file.asMap();
-			
+
 			StringBuilder sb = new StringBuilder();
 			List<BObject> pathElements = info.get(PATH_KEY).asList();
-			if(pathElements.isEmpty()) {
+			if (pathElements.isEmpty()) {
 				throw new IllegalArgumentException("no path elements provided");
 			}
-			
+
 			// Form the full path to the resource.
-			for(BObject elem : pathElements) {
+			for (BObject elem : pathElements) {
 				sb.append(File.separator);
 				sb.append(elem.asString());
 			}
-			
+
 			fileDictList.add(new FileDictionary(dirName, sb.toString(), info.get(LENGHT_KEY).asLong()));
 		}
-		return fileDictList;	
+		return fileDictList;
 	}
 }
