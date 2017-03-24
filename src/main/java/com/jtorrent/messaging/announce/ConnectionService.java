@@ -1,11 +1,14 @@
 package com.jtorrent.messaging.announce;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,6 +17,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.lang.model.type.IntersectionType;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +26,17 @@ import org.slf4j.LoggerFactory;
 import com.jtorrent.peer.Peer;
 import com.jtorrent.torrent.TorrentClient;
 import com.jtorrent.torrent.TorrentSession;
+import com.jtorrent.utils.Utils;
 
-// FIXME - add comment
+/**
+ * ConnectionService is an abstraction that allows for Torrent Sessions to connect to 
+ * seeding peers via the {@link #connect()} and listen for incoming
+ * peer connections by invoking the {@link #register()}. A Torrent Session
+ * can opt out of accepting incoming connections by invoking the {@link #unregister()}
+ * method.
+ * @author Alex
+ *
+ */
 public class ConnectionService {
 
 	private static final Logger _logger = LoggerFactory.getLogger(ConnectionService.class);
@@ -33,32 +47,45 @@ public class ConnectionService {
 	private static final int START_PORT = 49152;
 	private static final int END_PORT = 65535;
 
-	private static final int OUTBOUND_CONNECTIONS = 25;
-	private static final long OUTBOUND_CONNECTIONS_KEEP_ALIVE_TIME = 20;
+	private static final int NUMBER_OF_SIMULTANIOUS_CONNECTIONS = 25;
+	private static final long KEEP_ALIVE_TIME = 20;
+	
+	private static final int LISTEN_SLEEP_DURATION = 50;
 
-	private ServerSocketChannel _incommingChannel;
+	/**
+	 * Used for listening for incoming connections.
+	 */
 
 	private String _clientPeerID;
+	private Map<String, TorrentSession> _registeredTorrents;
+	
+	private ServerSocketChannel _listenChannel;
 	private InetSocketAddress _socketAddress;
-	private ExecutorService _inboundConnectionsService;
+	private ExecutorService _listeningService;
 	private boolean _listenForConnections;
-
-	private final ExecutorService _outboundConnectionService;
+	
+	private ExecutorService _connectionService;
 
 	public ConnectionService() {
 		_listenForConnections = false;
-		setSocketAddress(bindToSocket());
-		_outboundConnectionService = new ThreadPoolExecutor(OUTBOUND_CONNECTIONS, OUTBOUND_CONNECTIONS,
-				OUTBOUND_CONNECTIONS_KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+		_connectionService = new ThreadPoolExecutor(
+				NUMBER_OF_SIMULTANIOUS_CONNECTIONS,
+				NUMBER_OF_SIMULTANIOUS_CONNECTIONS,
+				KEEP_ALIVE_TIME,
+				TimeUnit.SECONDS,
+				new LinkedBlockingQueue<Runnable>());
+		
+		_registeredTorrents = new HashMap<>();
 	}
 
 	private InetSocketAddress bindToSocket() {
 		for (int port = START_PORT; port <= END_PORT; port++) {
 			try {
 				InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLocalHost(), port);
-				_incommingChannel = ServerSocketChannel.open();
-				_incommingChannel.socket().bind(socketAddress);
-				_incommingChannel.configureBlocking(false);
+				_listenChannel = ServerSocketChannel.open();
+				_listenChannel.socket().bind(socketAddress);
+				_listenChannel.configureBlocking(false);
+				_logger.debug("Opened on port {}", port);
 				return socketAddress;
 			} catch (IOException e) {
 				// Try the next port.
@@ -83,53 +110,128 @@ public class ConnectionService {
 	private synchronized void setSocketAddress(InetSocketAddress address) {
 		_socketAddress = address;
 	}
+	
+	public synchronized void register(TorrentSession session) {
+		if(session == null) {
+			return;
+		}
+		_registeredTorrents.put(session.getMetaInfo().getHexInfoHash(), session);
+	}
+	
+	public synchronized void unregister(TorrentSession session) {
+		if(session == null) {
+			return;
+		}
+		_registeredTorrents.remove(session.getMetaInfo().getHexInfoHash());
+	}
 
 	public void stop() {
 		_listenForConnections = false;
-		if(!_outboundConnectionService.isShutdown() && !_outboundConnectionService.isTerminated()) {
-			_outboundConnectionService.shutdown();
+		if(!_connectionService.isShutdown() && !_connectionService.isTerminated()) {
+			_connectionService.shutdown();
 		}
-		_inboundConnectionsService = null;
+		
+		if(!_listeningService.isShutdown() && !_listeningService.isTerminated()) {
+			_listeningService.shutdown();
+		}
+		
+		_connectionService = null;
+		_listeningService = null;
+		
+		for(TorrentSession ts : _registeredTorrents.values()) {
+			unregister(ts);
+		}
 	}
 
-	public void start() {
-		if (_inboundConnectionsService != null) {
+	public void start() throws IllegalStateException {
+		if(_socketAddress != null) {
 			return;
 		}
-
-		_inboundConnectionsService = Executors.newSingleThreadExecutor();
-		_inboundConnectionsService.execute(new ListenTask());
+		
+		InetSocketAddress clientAddress = bindToSocket();
+		if(clientAddress == null) {
+			throw new IllegalStateException("Could not find a port to bind to");
+		}
+		setSocketAddress(clientAddress);
+		
+		if (_listeningService != null) {
+			return;
+		}
+				
+		_listeningService = Executors.newSingleThreadExecutor();
+		_listeningService.execute(new ListenTask());
 		_listenForConnections = true;
 	}
 	
 	public void cancel() throws IOException {
-		if(_incommingChannel != null) {
-			_incommingChannel.close();
-			_incommingChannel = null;
+		if(_listenChannel != null) {
+			_listenChannel.close();
+			_listenChannel = null;
 		}
 	}
 	
 	public Future<HandshakeResponse> connect(TorrentSession session, Peer peer) {
-		return _outboundConnectionService.submit(new ConnectionTask(peer, session));
+		if(_connectionService != null && !_connectionService.isShutdown() 
+				&& !_connectionService.isTerminated()) {
+			return _connectionService.submit(new ConnectionTask(peer, session));
+		}
+		
+		return null;
 	}
 
-	// TODO - P0 implement after implementing the downloading features
 	// TODO - doc
 	private class ListenTask implements Runnable {
 
 		@Override
 		public void run() {
 			while (_listenForConnections) {
-
+				try {
+					SocketChannel connectionChannel = _listenChannel.accept();
+					if(connectionChannel != null) {
+						_logger.debug("Handling new connection...");
+						connect(connectionChannel);
+					}
+				} catch (IOException e) {
+					_logger.warn("Torrent client channel is unavailable. Terminating...");
+					stop();
+				}
+				
+				try {
+					TimeUnit.MILLISECONDS.sleep(LISTEN_SLEEP_DURATION);
+				} catch (InterruptedException e) {
+					stop();
+				}
 			}
 		}
 
-		private void accept() {
-			// TODO - implemet
-		}
-
-		private void stop() {
-			// TODO - release the channel and the executor
+		private void connect(SocketChannel channel) {
+			InetAddress address = channel.socket().getInetAddress();
+			try {
+				HandshakeMessage msg = HandshakeMessage.parse(channel);
+				if(msg == null) {
+					return;
+				}
+				
+				TorrentSession session = _registeredTorrents.get(Utils.convertToHex(msg.getInfoHash()));
+				
+				boolean check = HandshakeMessage.check(session.getMetaInfo().getInfoHash(),
+						msg, _clientPeerID, address);
+				if(!check) {
+					_logger.warn("Invalid handshake message from {}", address.toString());
+				}
+				
+				ByteBuffer handshake = HandshakeMessage.make(session.getMetaInfo().getInfoHash(),
+						_clientPeerID);
+				channel.write(handshake);
+				Peer peer = new Peer(channel.socket(), msg.getPeerID());
+				session.getPeerManager().registerConnection(peer, channel);
+			} catch (HandshakeException | UnsupportedEncodingException e) {
+				_logger.warn("Could not parse handhskae message from {}: {}", address.toString(),
+						e.getMessage());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 

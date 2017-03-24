@@ -5,6 +5,18 @@ import java.util.BitSet;
 
 public class Utils {
 
+	protected static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+	
+	public static String convertToHex(byte[] bytes) {
+		char[] hexChars = new char[bytes.length * 2];
+		for (int j = 0; j < bytes.length; j++) {
+			int v = bytes[j] & 0xFF;
+			hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+			hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+		}
+		return new String(hexChars);
+	}
+	
 	public static BitSet convertByteBufferToBitSet(ByteBuffer payload) {
 		// Every byte consists of 8 bits. The total size of the bit set
 		// is [number of bytes] * [number of bits in byte].

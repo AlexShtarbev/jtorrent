@@ -2,6 +2,7 @@ package com.jtorrent.messaging.announce;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
@@ -36,6 +37,13 @@ public class HandshakeMessage {
 		_peerID = peerID;
 	}
 
+	public static HandshakeMessage parse(SocketChannel channel) throws HandshakeException, IOException {
+		ByteBuffer buff = ByteBuffer.allocate(HANDSHAKE_LENGTH + IDENTIFIER.length());
+		channel.read(buff);
+		buff.rewind();
+		return parse(buff);
+	}
+	
 	public static HandshakeMessage parse(ByteBuffer buff) throws HandshakeException, UnsupportedEncodingException {
 		// Get the pstrlen first.
 		int pstrlen = Byte.valueOf(buff.get()).intValue();
@@ -102,24 +110,34 @@ public class HandshakeMessage {
 		try {
 			channel.read(buff);
 			buff.rewind();
+			InetAddress address = channel.socket().getInetAddress();
 			HandshakeMessage handshake = parse(buff);
-			if (!Arrays.equals(handshake.getInfoHash(), session.getMetaInfo().getInfoHash())) {
-				throw new HandshakeException(
-						"info has does not match from channel" + channel.socket().getInetAddress().toString());
+			if (check(session.getMetaInfo().getInfoHash(), handshake, peerID, address)) {
+				return handshake;
 			}
-
-			if (peerID != null) {
-				if (!peerID.equals(handshake.getPeerID())) {
-					throw new HandshakeException(
-							"peer ID not matching fo channel " + channel.socket().getInetAddress().toString());
-				}
-			}
-
-			return handshake;
+			
+			return null;
 		} catch (IOException e) {
 			throw new HandshakeException(
 					"could not read from the channel to " + channel.socket().getInetAddress().toString());
 		}
+	}
+	
+	public static boolean check(byte[] infoHash, HandshakeMessage handshake, String peerID,
+			InetAddress peerInetAddress) throws HandshakeException, UnsupportedEncodingException {
+		if (!Arrays.equals(handshake.getInfoHash(), infoHash)) {
+			throw new HandshakeException(
+					"info has does not match from channel" + peerInetAddress.toString());
+		}
+
+		if (peerID != null) {
+			if (!peerID.equals(handshake.getPeerID())) {
+				throw new HandshakeException(
+						"peer ID not matching fo channel " + peerInetAddress.toString());
+			}
+		}
+
+		return true;
 	}
 
 	public String getPeerID() {

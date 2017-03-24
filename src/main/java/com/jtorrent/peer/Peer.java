@@ -25,18 +25,19 @@ import com.jtorrent.messaging.message.MessageListener;
 import com.jtorrent.messaging.message.Messages;
 import com.jtorrent.messaging.message.NotInterestedMessage;
 import com.jtorrent.messaging.message.PieceMessage;
+import com.jtorrent.messaging.message.RequestMessage;
 import com.jtorrent.messaging.message.UnchokeMessage;
 import com.jtorrent.messaging.rate.RateAccumulator;
 import com.jtorrent.storage.Piece;
 import com.jtorrent.storage.PieceRepository;
 import com.jtorrent.storage.PieceRepository.Block;
+import com.jtorrent.torrent.SessionInfo;
 import com.jtorrent.torrent.TorrentSession;
+import com.jtorrent.utils.Utils;
 
 public class Peer implements MessageListener {
 	
 	private static final Logger _logger = LoggerFactory.getLogger(Peer.class);
-	
-	protected static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
 	private InetSocketAddress _address;
 	private String _peerID;
@@ -95,7 +96,7 @@ public class Peer implements MessageListener {
 	public void setPeerID(String peerID) {
 		_peerID = peerID;
 		if (peerID != null) {
-			_hexPerrID = convertToHex(_peerID.getBytes());
+			_hexPerrID = Utils.convertToHex(_peerID.getBytes());
 		}
 	}
 
@@ -157,15 +158,7 @@ public class Peer implements MessageListener {
 	 *            The data to convert
 	 * @return A hexadecimal representation of the data.
 	 */
-	public static String convertToHex(byte[] bytes) {
-		char[] hexChars = new char[bytes.length * 2];
-		for (int j = 0; j < bytes.length; j++) {
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-			hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-		}
-		return new String(hexChars);
-	}
+	
 
 	@Override
 	public String toString() {
@@ -487,5 +480,54 @@ public class Peer implements MessageListener {
 		// Ask for the next piece after this one has been completed.
 		repo.removeCurrentRequestedPiece(this);
 		askForNewPiece(repo);
+	}
+	
+	private synchronized void onRequest(PieceRepository repo, Message msg) {
+		// We should watch put for choked peers who send requests. The BitTorrent protocol
+		// states that in this case all of the peers requests are to be dropped. Same goes
+		// for the occasion when the client is asked for a piece it does not have.
+		if(_amChoking) {
+			_logger.warn("Peer {} is CHOKED by client. Dropping request...", getHostAddress());
+			unbind(true);
+			return;
+		}
+		
+		RequestMessage reqMsg = (RequestMessage) msg;
+		
+		// Check if the torrent has the piece from which the peer wants to read.
+		Piece piece = repo.get(reqMsg.getPieceIndex());
+		if(piece == null || !piece.isOnDisk()) {
+			_logger.warn("Peer {} is asking for a piece {} that the client does not have", getHostAddress(),
+					reqMsg.getPieceIndex());
+			unbind(true);
+			return;
+		}
+		
+		// Check the block size.
+		if(reqMsg.getLength() > RequestMessage.MAX_REQUEST_SIZE) {
+			_logger.warn("Peer {} requested a block too large", getHostAddress());
+			unbind(true);
+			return;
+		}
+		
+		// All the checks are OK. Sent a PIECE message to the peer.
+		sendPieceResponse(repo, reqMsg);
+	}
+	
+	private synchronized void sendPieceResponse(PieceRepository repo, RequestMessage reqMsg) {
+		try {
+			ByteBuffer block = repo.readBlock(reqMsg.getPieceIndex(), reqMsg.getBegin(), reqMsg.getLength());
+			ByteBuffer pieceMessage = PieceMessage.make(reqMsg.getPieceIndex(), reqMsg.getBegin(), block);
+			_messageChannel.send(pieceMessage);
+			
+			_uploadRate.accumulate(block.capacity());
+			SessionInfo sessionInfo = _torrentSession.getSessionInfo();
+			sessionInfo.setUploaded(sessionInfo.getDownloaded() 
+					+ repo.get(reqMsg.getPieceIndex()).getSize());
+		} catch (IllegalStateException e) {
+			_logger.warn("Peer {} has illegal state {}", getHostAddress(), e.getMessage());
+		} catch (IOException e) {
+			_logger.warn("IO exception while sending block to peer {}: {}", getHostAddress(), e.getMessage());
+		}
 	}
 }

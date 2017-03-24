@@ -15,27 +15,27 @@ public class SessionInfo {
 		_clientPeer = clientPeer;
 	}
 
-	public long getDownloaded() {
+	public synchronized long getDownloaded() {
 		return _downloaded;
 	}
 
-	public void setDownloaded(long downloaded) {
+	public synchronized void setDownloaded(long downloaded) {
 		_downloaded = downloaded;
 	}
 
-	public long getUploaded() {
+	public synchronized long getUploaded() {
 		return _uploaded;
 	}
 
-	public void setUploaded(long uploaded) {
+	public synchronized void setUploaded(long uploaded) {
 		_uploaded = uploaded;
 	}
 
-	public long getLeft() {
+	public synchronized long getLeft() {
 		return _left;
 	}
 
-	public void setLeft(long left) {
+	public synchronized void setLeft(long left) {
 		_left = left;
 	}
 

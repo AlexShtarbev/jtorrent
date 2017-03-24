@@ -205,9 +205,14 @@ public class PeerManager implements PeerStateListener {
 		addAll(peers);
 		ArrayList<Future<HandshakeResponse>> results = new ArrayList<Future<HandshakeResponse>>();
 		for (Peer peer : _addressToPeerMap.values()) {
-			results.add(_connectionService.connect(_torrentSession, peer));
+			Future<HandshakeResponse> future = _connectionService.connect(_torrentSession, peer);
+			if(future == null) {
+				continue;
+			}
+			
+			results.add(future);
 		}
-
+		
 		for (Future<HandshakeResponse> handshakeResponseFuture : results) {
 			_registerService.execute(new RegisterTask(handshakeResponseFuture));
 		}

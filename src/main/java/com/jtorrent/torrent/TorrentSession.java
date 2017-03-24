@@ -32,6 +32,7 @@ public class TorrentSession {
 	public enum Status {
 		QUEUING,
 		DOWNLOADING,
+		FINILIZING,
 		SEEDING,
 		CHECKING,
 		DONE
@@ -49,9 +50,6 @@ public class TorrentSession {
 	private final MultiFileStore _store;
 	private final PieceRepository _pieceRepository;
 	private Status _torrentState;
-
-	private boolean _isSeeding;
-	private boolean _downloaded;
 
 	public TorrentSession(String torrentFileName, String destination, Peer clientPeer,
 			ConnectionService connectionService)
@@ -79,10 +77,9 @@ public class TorrentSession {
 			_torrentState = Status.CHECKING;
 			checkTorrentCompletion();
 			
-			_downloaded = false;
 			_torrentState = Status.DOWNLOADING;
 		} else {
-			_downloaded = true;
+
 			_torrentState = Status.SEEDING;
 		}
 		
@@ -99,7 +96,8 @@ public class TorrentSession {
 		try {
 			_announceService.stop(false);
 			_peerManager.disconnectAllConcurrently();
-			_peerManager.stop();			
+			_peerManager.stop();		
+			_connectionService.unregister(this);
 		} catch (InterruptedException e) {
 			// Ignore.
 		}
@@ -119,7 +117,9 @@ public class TorrentSession {
 	 *            The response message from the tracker.
 	 */
 	public void onTrackerResponse(TrackerResponseMessage message) {
-		_peerManager.registerConnectionAll(message.getPeers());
+		if(!Status.SEEDING.equals(_torrentState)) {
+			_peerManager.registerConnectionAll(message.getPeers());
+		}
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class TorrentSession {
 	}
 
 	public boolean isFinilizing() {
-		return _downloaded;
+		return Status.FINILIZING.equals(_torrentState);
 	}
 	
 	/**
@@ -240,13 +240,13 @@ public class TorrentSession {
 		}
 	}
 	
-	public synchronized void onTorrentDownloaded(PieceRepository repo) {
+	public void onTorrentDownloaded(PieceRepository repo) {
 		_logger.info("Last piece received and checked. Torrent has been downloaded");
 		
 		try {
+			_torrentState = Status.FINILIZING;
 			getFileStore().complete();
 			_announceService.sendCompletedMessage();
-			_downloaded = true;
 		} catch (IOException e) {
 			_logger.warn("could not finish downloading the file {}", e.getMessage());
 			return;
@@ -254,7 +254,20 @@ public class TorrentSession {
 			_logger.warn("could not send COMPLEDTED message to tracker");
 		}
 		
+		// FIXME
+		// stop();
+		startSeeding();
+	}
+	
+	public void startSeeding() {
+		if(Status.SEEDING.equals(_torrentState)) {
+			return;
+		}
+		
+		_torrentState = Status.SEEDING;
+	}
+	
+	public void stopSeeding() {
 		stop();
-		// TODO - start seeding
 	}
 }

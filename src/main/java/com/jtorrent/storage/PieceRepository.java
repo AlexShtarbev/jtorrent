@@ -110,6 +110,10 @@ public class PieceRepository {
 	}
 
 	public Piece get(int index) {
+		if(index < 0 || index >= size()) {
+			return null;
+		}
+		
 		return _pieces[index];
 	}
 

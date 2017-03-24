@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 
 import com.jtorrent.bencode.*;
 import com.jtorrent.bencode.BObject.BEncodingException;
+import com.jtorrent.utils.Utils;
 
 /**
  * Parses and contains the meta info file structure. <br/>
@@ -55,6 +56,7 @@ public class MetaInfo {
 	 * Metainfo file. Note that the value will be a bencoded dictionary.
 	 */
 	private final byte[] _infoHash;
+	private final String _infoHashHex;
 
 	public MetaInfo(File torrentFile)
 			throws IOException, NoSuchAlgorithmException, URISyntaxException, InvalidAlgorithmParameterException {
@@ -69,6 +71,7 @@ public class MetaInfo {
 		}
 		_info = _decodedMetaInfo.get(INFO_KEY).asMap();
 		_infoHash = provideInfoHash();
+		_infoHashHex = Utils.convertToHex(_infoHash);
 		_announceList = provideAnnounceList();
 		_creationDate = provideCreationDate();
 		_createdBy = provideCreatedBy();
@@ -206,6 +209,10 @@ public class MetaInfo {
 
 	public byte[] getInfoHash() {
 		return _infoHash;
+	}
+	
+	public String getHexInfoHash() {
+		return _infoHashHex;
 	}
 
 	public InfoDictionary getInfoDictionary() {

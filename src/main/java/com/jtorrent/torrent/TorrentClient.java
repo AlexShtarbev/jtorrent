@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +35,20 @@ public class TorrentClient {
 		_sessionExecutor = Executors.newCachedThreadPool();
 	}
 
-	public boolean registerNewSession(String fileName, String destination)
+	public void registerNewSession(String fileName, String destination)
 			throws InterruptedException, ExecutionException {
-		Future<Boolean> result = _sessionExecutor
+		/*Future<Boolean> result = _sessionExecutor
 				.submit(new TorrentSessionTask(_connectionService, fileName, destination));
-		return result.get();
+		return result.get();*/
+		
+		_sessionExecutor.execute(new TorrentSessionTask(_connectionService, fileName, destination));
 	}
 
 	public void shutdown() {
 		_sessionExecutor.shutdown();
 	}
 
-	private static class TorrentSessionTask implements Callable<Boolean> {
+	private static class TorrentSessionTask implements Runnable {
 		private Peer _clientPeer;
 		private String _fileName;
 		private String _destination;
@@ -71,28 +72,18 @@ public class TorrentClient {
 
 		@SuppressWarnings("unused")
 		@Override
-		public Boolean call() throws Exception {
+		public void run() {
 			TorrentSession ts = null;
 			try {
 				ts = new TorrentSession(_fileName, _destination, _clientPeer, _connectionService);
+				_connectionService.register(ts);
 				ts.start();
-				/*try {
-					TimeUnit.MINUTES.sleep(2);
-					// ts.stop();
-				} catch (InterruptedException e) {
-					// TODO log
-					e.printStackTrace();
-				}
-				return true;*/
 			} catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException |
 					IOException| URISyntaxException e) {
 				if(ts != null) {
 					ts.stop();
 				}
 			} 
-
-			return false;
-
 		}
 	}
 
@@ -101,7 +92,7 @@ public class TorrentClient {
 	}
 	
 	public void start() {
-		// TODO - implement
+		_connectionService.start();
 	}
 	
 	public void stop() {
@@ -118,8 +109,10 @@ public class TorrentClient {
 		// Future<Boolean> result2 = es.submit(new SessionTask(clientPeer,
 		// "D:/Movie/t1.torrent", "D:/Movie/dir"));
 		TorrentClient client = new TorrentClient();
+		client.start();
 		try {
-			client.registerNewSession("D:/Movie/vamp.torrent", "D:/Movie/dir");
+			client.registerNewSession("D:/Movie/orig.torrent", "D:/Movie/dir");
+			//client.registerNewSession("D:/Movie/minecraft.torrent", "D:/Movie/dir");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
