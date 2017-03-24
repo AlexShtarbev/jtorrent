@@ -219,8 +219,7 @@ public class Peer implements MessageListener {
 		notifyAllListeners();
 		
 		if(shouldCancelBlocks && isConnected()) {			
-			cancelAll();
-			_logger.debug("Peer {} unbinding", getHostAddress());
+			cancelAllRequests();
 			_messageChannel.send(NotInterestedMessage.make());
 		}
 	
@@ -231,17 +230,22 @@ public class Peer implements MessageListener {
 		}		
 	}
 	
-	public void cancelAll() {
+	public void cancelAllRequests() {
 		PieceRepository repo = _torrentSession.getPieceRepository();
 		if(repo.isDownloadingPiece(this)) {
 			BlockingQueue<Block> blocksInFlight = repo.getBlocksInFlight(this);
+			
+			if(blocksInFlight == null) {
+				return;
+			}
+			
 			for(Block block : blocksInFlight) {
 				ByteBuffer cancelBlockMessage = CancelMessage.make(
 						block.getPieceIndex(), block.getBegin(), block.getLength());
 				_messageChannel.send(cancelBlockMessage);
 			}
 			
-			repo.cancelRequestedBlocks(this);
+			repo.cancelAllRequestedBlocks(this);
 		}
 	}
 	
@@ -321,7 +325,7 @@ public class Peer implements MessageListener {
 			Piece piece = repo.getDownloadingPiece(this);
 			if(piece != null) {
 				repo.setPeerHavePiece(this, piece.getIndex(), false);
-				cancelAll();
+				cancelAllRequests();
 			}
 		}
 	}
@@ -439,8 +443,9 @@ public class Peer implements MessageListener {
 						sendBlockRequests(repo);
 					}
 					// Check if the torrent has been completely downloaded.
-					if(repo.size() == repo.getNumberOfcompletedPieces()) {
-						_torrentSession.onTorrentComplete(repo);
+					if(repo.size() == repo.getNumberOfcompletedPieces() &&
+							!_torrentSession.isFinilizing()) {
+						_torrentSession.onTorrentDownloaded(repo);
 					}
 				} catch (IOException | IllegalStateException e) {
 					_logger.warn("{} in peer {}", e, getHexPeerID());

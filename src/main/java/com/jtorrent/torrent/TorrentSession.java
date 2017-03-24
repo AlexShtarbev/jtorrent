@@ -29,7 +29,7 @@ import com.jtorrent.storage.Piece;
 import com.jtorrent.storage.PieceRepository;
 
 public class TorrentSession {
-	public enum State {
+	public enum Status {
 		QUEUING,
 		DOWNLOADING,
 		SEEDING,
@@ -48,16 +48,17 @@ public class TorrentSession {
 	private final ConnectionService _connectionService;
 	private final MultiFileStore _store;
 	private final PieceRepository _pieceRepository;
-	private State _torrentState;
+	private Status _torrentState;
 
 	private boolean _isSeeding;
+	private boolean _downloaded;
 
 	public TorrentSession(String torrentFileName, String destination, Peer clientPeer,
 			ConnectionService connectionService)
 			throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, URISyntaxException {
 		_metaInfo = new MetaInfo(new File(torrentFileName));
 		_store = new MultiFileStore(_metaInfo.getInfoDictionary().getFiles(), destination);
-		_torrentState = State.QUEUING;
+		_torrentState = Status.QUEUING;
 		
 		// Session information
 		_sessionInfo = new SessionInfo(clientPeer);
@@ -73,32 +74,33 @@ public class TorrentSession {
 	}
 
 	public void start() {
-		// First it is checked if the torrent is not complete.
+		// Firstly, set the status of the torrent.
 		if(!_pieceRepository.isRepositoryCompleted()) {
-			_torrentState = State.CHECKING;
+			_torrentState = Status.CHECKING;
 			checkTorrentCompletion();
 			
-			_torrentState = State.DOWNLOADING;
-			_announceService.start();
-			try {
-				_peerManager.start();
-			} catch (Exception e) {
-				_logger.warn("expcetion occurred while starting torrent session: {}", e.getMessage());
-			}
+			_downloaded = false;
+			_torrentState = Status.DOWNLOADING;
 		} else {
-			// TODO - handle state
-			// Maybe start seeding
+			_downloaded = true;
+			_torrentState = Status.SEEDING;
+		}
+		
+		// Start the services.
+		_announceService.start();
+		try {
+			_peerManager.start();
+		} catch (Exception e) {
+			_logger.warn("expcetion occurred while starting torrent session: {}", e.getMessage());
 		}
 	}
 
 	public void stop() {
 		try {
 			_announceService.stop(false);
-			_connectionService.stop();
-			_connectionService.cancel();
-			_peerManager.stop();
-			_peerManager.cleanup();
-		} catch (InterruptedException | IOException e) {
+			_peerManager.disconnectAllConcurrently();
+			_peerManager.stop();			
+		} catch (InterruptedException e) {
 			// Ignore.
 		}
 	}
@@ -148,7 +150,7 @@ public class TorrentSession {
 		return _pieceRepository;
 	}
 	
-	public State getState() {
+	public Status getState() {
 		return _torrentState;
 	}
 	
@@ -156,6 +158,10 @@ public class TorrentSession {
 		return _announceService;
 	}
 
+	public boolean isFinilizing() {
+		return _downloaded;
+	}
+	
 	/**
 	 * Check how much of the torrent is present on disk.
 	 */
@@ -234,12 +240,13 @@ public class TorrentSession {
 		}
 	}
 	
-	public synchronized void onTorrentComplete(PieceRepository repo) {
+	public synchronized void onTorrentDownloaded(PieceRepository repo) {
 		_logger.info("Last piece received and checked. Torrent has been downloaded");
 		
 		try {
 			getFileStore().complete();
 			_announceService.sendCompletedMessage();
+			_downloaded = true;
 		} catch (IOException e) {
 			_logger.warn("could not finish downloading the file {}", e.getMessage());
 			return;
@@ -247,13 +254,7 @@ public class TorrentSession {
 			_logger.warn("could not send COMPLEDTED message to tracker");
 		}
 		
-		// Cancel all requests that the peers might have.
-		PeerManager peerManager = getPeerManager();
-		for(Peer peer: peerManager.getConnectedPeers()) {
-			// TODO - make unbinding parallel
-			peer.unbind(true);
-		}
-		
+		stop();
 		// TODO - start seeding
 	}
 }

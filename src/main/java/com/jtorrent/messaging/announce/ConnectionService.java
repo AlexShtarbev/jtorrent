@@ -38,7 +38,7 @@ public class ConnectionService {
 
 	private ServerSocketChannel _incommingChannel;
 
-	private String _jtorrentPeerID;
+	private String _clientPeerID;
 	private InetSocketAddress _socketAddress;
 	private ExecutorService _inboundConnectionsService;
 	private boolean _listenForConnections;
@@ -69,11 +69,11 @@ public class ConnectionService {
 	}
 
 	public String getClientPeerID() {
-		return _jtorrentPeerID;
+		return _clientPeerID;
 	}
 
 	public void setClientPeerID(String peerID) {
-		_jtorrentPeerID = peerID;
+		_clientPeerID = peerID;
 	}
 
 	public synchronized InetSocketAddress getSocketAddress() {
@@ -159,7 +159,7 @@ public class ConnectionService {
 				// peer.
 				channel.configureBlocking(true);
 				_logger.debug("Sending handshake to {}", _peer);
-				ByteBuffer handshakeRequest = HandshakeMessage.make(_session.getMetaInfo().getInfoHash(), _jtorrentPeerID);
+				ByteBuffer handshakeRequest = HandshakeMessage.make(_session.getMetaInfo().getInfoHash(), _clientPeerID);
 				int sent = channel.write(handshakeRequest);
 				_logger.debug("sent {} bytes handshake to {}", sent, _peer.toString());
 				HandshakeMessage handshake = HandshakeMessage.validate(_session, channel, _peer.getPeerID());

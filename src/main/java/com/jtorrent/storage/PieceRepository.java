@@ -478,7 +478,7 @@ public class PieceRepository {
 		return rp.getBlocksInFlight();
 	}
 	
-	public synchronized void cancelRequestedBlocks(Peer peer) {
+	public synchronized void cancelAllRequestedBlocks(Peer peer) {
 		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
 		if(rp == null) {
 			return;

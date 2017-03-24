@@ -34,7 +34,6 @@ public class TorrentClient {
 	public TorrentClient() {
 		_connectionService = new ConnectionService();
 		_sessionExecutor = Executors.newCachedThreadPool();
-
 	}
 
 	public boolean registerNewSession(String fileName, String destination)
@@ -65,9 +64,8 @@ public class TorrentClient {
 				_clientPeer = new Peer(_connectionService.getSocketAddress().getAddress().getHostAddress(),
 						_connectionService.getSocketAddress().getPort(), _connectionService.getClientPeerID());
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.exit(0);
+				_logger.warn("Exception occured while starting torrent session for {}: {}",
+						fileName, e.getMessage());
 			}
 		}
 
@@ -100,6 +98,19 @@ public class TorrentClient {
 
 	public ConnectionService getConnectionService() {
 		return _connectionService;
+	}
+	
+	public void start() {
+		// TODO - implement
+	}
+	
+	public void stop() {
+		_connectionService.stop();
+		try {
+			_connectionService.cancel();
+		} catch (IOException e) {
+			// Ignore
+		}
 	}
 
 	public static void main(String[] args) {

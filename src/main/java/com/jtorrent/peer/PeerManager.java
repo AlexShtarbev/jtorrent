@@ -2,8 +2,8 @@ package com.jtorrent.peer;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
-import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,6 +68,7 @@ public class PeerManager implements PeerStateListener {
 	private final ConnectionService _connectionService;
 	private final TorrentSession _torrentSession;
 	private final ExecutorService _registerService;
+	private final Thread _chokerThread;
 	
 	private volatile boolean _stop;
 
@@ -79,6 +81,8 @@ public class PeerManager implements PeerStateListener {
 		_connectionService = connService;
 		_torrentSession = session;
 		_registerService = Executors.newCachedThreadPool();
+		
+		_chokerThread = new Thread(new ChokerTask());
 	}
 
 	public void cleanup() {
@@ -271,12 +275,43 @@ public class PeerManager implements PeerStateListener {
 	
 	public void start() {
 		_stop = false;
-		/*Thread th = new Thread(new ChokerTask());
-		th.start();*/
+		_chokerThread.start();
 	}
 	
-	public void stop() {
+	public void stop() throws InterruptedException {
 		_stop = true;
+		_chokerThread.join(5000);
+		cleanup();
+	}
+	
+	public synchronized void disconnectAllConcurrently() throws InterruptedException {
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		
+		List<Callable<Boolean>> callables = new ArrayList<Callable<Boolean>>();
+		
+		for(Peer peer: getConnectedPeers()) {
+			callables.add(()-> {
+				peer.unbind(true);
+				return true;
+			});
+		}
+		
+		executor.invokeAll(callables);
+		
+		try {
+		    executor.shutdown();
+		    executor.awaitTermination(5, TimeUnit.SECONDS);
+		}
+		catch (InterruptedException e) {
+		    _logger.warn("Shutdown tasks interrupted.");
+		}
+		finally {
+		    if (!executor.isTerminated()) {
+		        _logger.debug("Cancelling non-finished tasks.");
+		    }
+		    executor.shutdownNow();
+		    _logger.debug("Shutdown finished successfully.");
+		}
 	}
 	
 	private class ChokerTask implements Runnable {
@@ -375,9 +410,9 @@ public class PeerManager implements PeerStateListener {
 		}
 		
 		public Comparator<Peer> provideRateComparator() throws IllegalStateException{
-			if(_torrentSession.getState().equals(TorrentSession.State.DOWNLOADING)) {
+			if(_torrentSession.getState().equals(TorrentSession.Status.DOWNLOADING)) {
 				return new DownloadRateComparator();
-			} else if(_torrentSession.getState().equals(TorrentSession.State.SEEDING)) {
+			} else if(_torrentSession.getState().equals(TorrentSession.Status.SEEDING)) {
 				return new UploadRateComparator();
 			} else {
 				throw new IllegalStateException("The torrent session is not downloading or seeding.");
