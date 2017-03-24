@@ -36,6 +36,10 @@ public class AnnounceService {
 		_announceService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
 	}
 
+	public TierManager getTierManager() {
+		return _tierManager;
+	}
+	
 	public void start() {
 		_stop = false;
 		_hardStop = false;
@@ -59,8 +63,7 @@ public class AnnounceService {
 		if (!_announceService.isShutdown() && !_announceService.isTerminated()
 				&& ((ThreadPoolExecutor) _announceService).getActiveCount() != 0) {
 			_announceService.shutdownNow();
-			_tierManager.closeAllConnections();
-			_announceService.awaitTermination(3, TimeUnit.SECONDS);
+			_announceService.awaitTermination(5, TimeUnit.SECONDS);
 		}
 	}
 

@@ -1,6 +1,5 @@
 package com.jtorrent.peer;
 
-import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -70,7 +69,7 @@ public class MessageChannel {
 		_closed = true;		
 		_messageService.shutdown();
 		try {
-			_messageService.awaitTermination(1, TimeUnit.MINUTES);
+			_messageService.awaitTermination(5, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			//Ignore - if we cannot await termination then something is wrong.
 		}
@@ -190,9 +189,7 @@ public class MessageChannel {
 					// Get ready to accept the entire message.
 					int length = message.getInt(0);
 					_logger.debug("Trying to read message with <len={}> from peer {}", length, _peer.getHostAddress());
-//					if(length > message.limit()) {
-//						throw new IOException("requested " + length + " which exceeds capacity");
-//					}
+
 					message.limit(Message.LENGTH_FIELD_SIZE + length);
 					while(!_closed && message.hasRemaining()) {
 						read(message);

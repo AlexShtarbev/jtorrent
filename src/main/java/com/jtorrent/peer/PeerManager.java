@@ -314,9 +314,8 @@ public class PeerManager implements PeerStateListener {
 					computeRateRotations--;
 				}
 				
-				synchronized (_connectedLockObject) {
-					managePeers(reamimingUnchokingRotations == 0);
-				}
+				managePeers(reamimingUnchokingRotations == 0);
+				
 				if (computeRateRotations == 0) {
 					for(Peer peer : _connectedPeersMap.values()) {
 						peer.getDownloadRate().reset();
@@ -388,9 +387,9 @@ public class PeerManager implements PeerStateListener {
 
 	@Override
 	public void onPeerDisconnected(Peer peer) {
-		synchronized (_connectedPeersMap) {
+		synchronized (_connectedLockObject) {
 			_connectedPeersMap.remove(peer.getHexPeerID());
-			_logger.debug("Peer {} disconnected, leaving {} connected peers", peer.getHostAddress(), _connectedPeersMap.values().size());
-		}
+			_logger.debug("Peer {} disconnected, leaving {} connected peers", peer.getHostAddress(), _connectedPeersMap.values().size());	
+		}		
 	}
 }

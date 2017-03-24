@@ -100,12 +100,4 @@ public class TierManager {
 	public List<List<TrackerClient>> getTierList() {
 		return _tierList;
 	}
-
-	public void closeAllConnections() {
-		for (List<TrackerClient> tier : _tierList) {
-			for (TrackerClient trackerClient : tier) {
-				trackerClient.close();
-			}
-		}
-	}
 }

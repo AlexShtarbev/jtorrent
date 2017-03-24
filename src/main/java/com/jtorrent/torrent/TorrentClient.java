@@ -108,7 +108,7 @@ public class TorrentClient {
 		// "D:/Movie/t1.torrent", "D:/Movie/dir"));
 		TorrentClient client = new TorrentClient();
 		try {
-			client.registerNewSession("D:/Movie/minecraft.torrent", "D:/Movie/dir");
+			client.registerNewSession("D:/Movie/vamp.torrent", "D:/Movie/dir");
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -70,18 +70,24 @@ public class TorrentSession {
 
 		// Pieces handling
 		_pieceRepository = new PieceRepository(this);
-		_torrentState = State.CHECKING;
-		checkTorrentCompletion();
-		//TODO - Handle torrent being completed.
 	}
 
 	public void start() {
-		_torrentState = State.DOWNLOADING;
-		_announceService.start();
-		try {
-			_peerManager.start();
-		} catch (Exception e) {
-			_logger.warn("expcetion occurred while starting torrent session: {}", e.getMessage());
+		// First it is checked if the torrent is not complete.
+		if(!_pieceRepository.isRepositoryCompleted()) {
+			_torrentState = State.CHECKING;
+			checkTorrentCompletion();
+			
+			_torrentState = State.DOWNLOADING;
+			_announceService.start();
+			try {
+				_peerManager.start();
+			} catch (Exception e) {
+				_logger.warn("expcetion occurred while starting torrent session: {}", e.getMessage());
+			}
+		} else {
+			// TODO - handle state
+			// Maybe start seeding
 		}
 	}
 
@@ -144,6 +150,10 @@ public class TorrentSession {
 	
 	public State getState() {
 		return _torrentState;
+	}
+	
+	public AnnounceService getAnnounceService() {
+		return _announceService;
 	}
 
 	/**
@@ -227,14 +237,6 @@ public class TorrentSession {
 	public synchronized void onTorrentComplete(PieceRepository repo) {
 		_logger.info("Last piece received and checked. Torrent has been downloaded");
 		
-		// Cancel all requests that the peers might have.
-		PeerManager peerManager = getPeerManager();
-		for(Peer peer: peerManager.getConnectedPeers()) {
-			if(repo.isDownloadingPiece(peer)) {
-				peer.cancelAll();
-			}
-		}
-		
 		try {
 			getFileStore().complete();
 			_announceService.sendCompletedMessage();
@@ -243,6 +245,13 @@ public class TorrentSession {
 			return;
 		} catch (AnnounceException e) {
 			_logger.warn("could not send COMPLEDTED message to tracker");
+		}
+		
+		// Cancel all requests that the peers might have.
+		PeerManager peerManager = getPeerManager();
+		for(Peer peer: peerManager.getConnectedPeers()) {
+			// TODO - make unbinding parallel
+			peer.unbind(true);
 		}
 		
 		// TODO - start seeding

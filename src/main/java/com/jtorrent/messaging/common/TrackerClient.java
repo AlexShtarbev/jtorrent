@@ -17,9 +17,6 @@ public abstract class TrackerClient {
 		_trackerURI = trackerURI;
 	}
 
-	public void close() {
-	};
-
 	public abstract TrackerResponseMessage queryTracker(TrackerRequestEvent event)
 			throws AnnounceException, IOException;
 	

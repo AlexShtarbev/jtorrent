@@ -31,6 +31,11 @@ import com.jtorrent.torrent.TorrentSession;
  * An abstraction over the piece storage. It provides functions for reading and
  * writing blocks of data to disk.
  * 
+ * 
+ * Each peer that wants to download or seed pieces from a torrent need to register 
+ * with the repository by calling {@link #register(Peer)} method. When the peer is
+ * no longer connected and communicating with the client, the peer must call the
+ * {@link #unregitser(Peer)} method.
  * <p>
  * </p>
  * @author Alex
@@ -99,9 +104,6 @@ public class PieceRepository {
 			// from the file store and the begin offset is easily calculate
 			// above.
 			int size = (int) Math.min(info.getPieceLength(), _fileStore.size() - begin);
-			if(index == 0 || index == _pieces.length - 1) {
-				_logger.debug("PIECE {} HAS SIZE {}", index, size);
-			}
 			Piece newPiece = new Piece(index, begin, size, hash);
 			_pieces[index] = newPiece;
 		}
@@ -236,7 +238,7 @@ public class PieceRepository {
 		return res;
 	}
 
-	public synchronized boolean checkPieceHashBlock(int pieceIndex, int blockBegin, ByteBuffer block) {
+	public synchronized boolean checkPieceHasBlock(int pieceIndex, int blockBegin, ByteBuffer block) {
 		if (block == null){
 			return true;
 		}
@@ -289,8 +291,18 @@ public class PieceRepository {
 
 	/////////////////////////// Choosing a piece for download ///////////////////////////
 	
+	/**
+	 * Registers a peer with the PieceRepository. Thus the repository will save and monitor
+	 * the current piece that the peer is downloading or sending and will also provide it
+	 * with which piece it can download next.
+	 * @param peer
+	 */
 	public synchronized void register(Peer peer) {
 		_peerBitSetMap.put(peer.getHexPeerID(), new BitSet(_pieces.length));
+	}
+	
+	public synchronized void unregister(Peer peer) {
+		_peerBitSetMap.remove(peer.getHexPeerID(), new BitSet(_pieces.length));
 	}
 	
 	/**
@@ -316,7 +328,8 @@ public class PieceRepository {
 	}
 	
 	/**
-	 * The repository no longer keeps tabs on the peer's bit set.
+	 * The repository no longer keeps tabs on the peer's bit set, requested pieces
+	 * and in flight blocks.
 	 * @param peer The peer to unfollow.
 	 */
 	public synchronized void unfollowPeer(Peer peer) {
@@ -424,6 +437,10 @@ public class PieceRepository {
 		return freePieceSet;
 	}
 	
+	public synchronized boolean isRepositoryCompleted() {
+		return _completedPieces.cardinality() == _pieces.length;
+	}
+	
 	///////////////////////// BLOCK
 	
 	public synchronized boolean isDownloadingPiece(Peer peer) {
@@ -468,15 +485,6 @@ public class PieceRepository {
 		}
 		
 		_requestedPiecesMap.remove(peer.getHexPeerID());
-	}
-	
-	public synchronized void cancelRequestedBlock(Peer peer, int blockBegin) {
-		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(rp == null) {
-			return;
-		}
-		
-		rp.blockCompleted(blockBegin);
 	}
 	
 	public synchronized boolean hasReachedEndgame() {
@@ -588,7 +596,7 @@ public class PieceRepository {
 	 */
 	private class RarestFirstSelector {
 		
-		public static final int MAX_SET_SIZE = 30;
+		public static final int MAX_SET_SIZE = 40;
 		private Random _generator;
 		
 		public RarestFirstSelector() {
@@ -598,12 +606,24 @@ public class PieceRepository {
 		public Piece select(Peer peer) {
 			// We can determine if a peer has a free piece if that piece has not
 			// been downloaded yet or is not currently being downloaded.
+			// The following code clears all the bits that are completed and 
+			// currently in flight, leaving those available for download.
 			BitSet freePieceSet = (BitSet) _peerBitSetMap.get(peer.getHexPeerID()).clone();
 			freePieceSet.andNot(_completedPieces);
 			freePieceSet.andNot(_inFlightPieces);
-			if(!hasFreePieces(peer, freePieceSet)) {
-				return null;
+			// If all the pieces are either completed or in flight the it is likely
+			// that end game is reached. For this reason the in-flight pieces are not 
+			// included in calculating the free piece set and the same pieces can be
+			// requested by different peers.
+			if(freePieceSet.cardinality() == 0) {
+				freePieceSet = (BitSet) _peerBitSetMap.get(peer.getHexPeerID()).clone();
+				freePieceSet.andNot(_completedPieces);
+				if(!hasFreePieces(peer, freePieceSet)) {
+					_logger.debug("No piece found for peer {}", peer.getHostAddress());
+					return null;
+				}
 			}
+			
 			
 			return selectRarest(freePieceSet);
 		}
@@ -616,24 +636,20 @@ public class PieceRepository {
 		 */
 		private boolean hasFreePieces(Peer peer, BitSet freePieceSet) {
 			// Check if there are any free bits. If not - check for end game.
+			
+			// This means there are no pieces to download for the peer and
+			// so there is nothing to do here.
 			if(freePieceSet.cardinality() == 0) {
-				freePieceSet = (BitSet) _peerBitSetMap.get(peer.getHexPeerID()).clone();
-				freePieceSet.andNot(_completedPieces);
-				
-				// This means there are no pieces in flight for the peer and
-				// so there is nothing to do here.
-				if(freePieceSet.cardinality() == 0) {
-					return false;
-				}
-				
-				// Check if the torrent session has not reached a state of entering
-				// end game.
-				if(!hasReachedEndgame()) {
-					_logger.debug("[END GAME]Not reached end game");
-					return false;
-				} else {
-					_logger.debug("[END GAME]Reached end game");
-				}
+				return false;
+			}
+			
+			// Check if the torrent session has not reached a state of entering
+			// end game.
+			if(!hasReachedEndgame()) {
+				_logger.debug("[END GAME]Not reached end game");
+				return false;
+			} else {
+				_logger.debug("[END GAME]Reached end game");
 			}
 			
 			return true;

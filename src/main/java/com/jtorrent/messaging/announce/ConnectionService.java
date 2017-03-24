@@ -98,7 +98,7 @@ public class ConnectionService {
 		}
 
 		_inboundConnectionsService = Executors.newSingleThreadExecutor();
-		_inboundConnectionsService.execute(new InboundConnectionsTask());
+		_inboundConnectionsService.execute(new ListenTask());
 		_listenForConnections = true;
 	}
 	
@@ -110,11 +110,12 @@ public class ConnectionService {
 	}
 	
 	public Future<HandshakeResponse> connect(TorrentSession session, Peer peer) {
-		return _outboundConnectionService.submit(new OutboundConnectionTask(peer, session));
+		return _outboundConnectionService.submit(new ConnectionTask(peer, session));
 	}
 
 	// TODO - P0 implement after implementing the downloading features
-	private class InboundConnectionsTask implements Runnable {
+	// TODO - doc
+	private class ListenTask implements Runnable {
 
 		@Override
 		public void run() {
@@ -132,7 +133,7 @@ public class ConnectionService {
 		}
 	}
 
-	private class OutboundConnectionTask implements Callable<HandshakeResponse> {
+	private class ConnectionTask implements Callable<HandshakeResponse> {
 		/**
 		 * The peer that the torrent session wants to connect to and exhange
 		 * pieces with.
@@ -140,7 +141,7 @@ public class ConnectionService {
 		private Peer _peer;
 		private TorrentSession _session;
 
-		public OutboundConnectionTask(Peer peer, TorrentSession session) {
+		public ConnectionTask(Peer peer, TorrentSession session) {
 			_peer = peer;
 			_session = session;
 		}

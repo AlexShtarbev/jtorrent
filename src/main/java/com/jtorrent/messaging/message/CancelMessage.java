@@ -28,13 +28,13 @@ public class CancelMessage extends Message {
 		// file storage limit.
 		int index = req.getPieceIndex();
 		PieceRepository repo = torrentSession.getPieceRepository();
-		return index < 0 || index > repo.size() || req.getBegin() + req.getLength() > repo.get(index).getSize();
+		return !(index < 0 || index > repo.size() || req.getBegin() + req.getLength() > repo.get(index).getSize());
 	}
 
 	public static CancelMessage parse(TorrentSession torrentSession, ByteBuffer data) throws MessageExchangeException {
 		CancelMessage msg = new CancelMessage(data);
 		if (!check(msg, torrentSession)) {
-			throw new MessageExchangeException("Invalid piece message for piece #" + msg.getPieceIndex());
+			throw new MessageExchangeException("Invalid CANCEL message for piece #" + msg.getPieceIndex());
 		}
 		return msg;
 	}

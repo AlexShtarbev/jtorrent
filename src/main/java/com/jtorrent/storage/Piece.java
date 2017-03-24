@@ -116,14 +116,17 @@ public class Piece implements Comparable<Piece>{
 		if(_data == null) {
 			return false;
 		}
-		byte[] data = _data.array();
-		for(int i = 0; i < block.length; i++) {
-			if(data[i + blockBegin] == block[i]) {
-				return true;
+		ByteBuffer dataClone = _data.duplicate();
+		dataClone.position(blockBegin);
+		byte[] bytes = new byte[block.length];
+		dataClone.get(bytes);
+		for(int i = 0; i < bytes.length; i++) {
+			if(bytes[i] != block[i]) {
+				return false;
 			}
 		}
 		
-		return false;
+		return true;
 	}
 
 	public synchronized void addBlock(ByteBuffer block, int blockBegin) {
