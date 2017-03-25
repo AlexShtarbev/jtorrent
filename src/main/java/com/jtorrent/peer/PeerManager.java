@@ -44,6 +44,10 @@ import com.jtorrent.torrent.TorrentSession;
  */
 public class PeerManager implements PeerStateListener {
 
+	public static final int MAX_TOTAL_NUMBER_OF_PEERS = 80;
+	public static final int MAX_NUMBER_OF_CONNECTED_PEERS = 40;
+	public static final int MIN_NUMBER_OF_CONNECTED_PEERS = 20;
+	
 	private static final int OPTIMISTIC_UNCHOKE_ROTATIONS = 3;
 	private static final int RATE_COMPUTATION_ROTATIONS = 2;
 	private static final int BEST_RECIPROCATION_PEERS = 4;
@@ -89,7 +93,10 @@ public class PeerManager implements PeerStateListener {
 		_registerService.shutdown();
 	}
 
-	public synchronized void addAll(List<Peer> peerList) {
+	public synchronized void set(List<Peer> peerList) {
+		_addressToPeerMap = new HashMap<String, Peer>();
+		_idToPeerMap = new HashMap<String, Peer>();
+		
 		for (Peer peer : peerList) {
 			add(peer);
 		}
@@ -159,6 +166,11 @@ public class PeerManager implements PeerStateListener {
 	 *            The channel to which to peer is to be bound
 	 */
 	public void registerConnection(Peer tryPeer, SocketChannel channel) {
+		// Limit the number of connected peers.
+		if(_connectedPeersMap.size() == MAX_NUMBER_OF_CONNECTED_PEERS) {
+			return;
+		}
+		
 		// See if we hate the peer in the list of peers. If not - add it.
 		// When the client fails connect to a peer, the peer is removed
 		Peer peer = get(tryPeer);
@@ -202,7 +214,7 @@ public class PeerManager implements PeerStateListener {
 	 *            The list of peers that will be registered.
 	 */
 	public void registerConnectionAll(List<Peer> peers) {
-		addAll(peers);
+		set(peers);
 		ArrayList<Future<HandshakeResponse>> results = new ArrayList<Future<HandshakeResponse>>();
 		for (Peer peer : _addressToPeerMap.values()) {
 			Future<HandshakeResponse> future = _connectionService.connect(_torrentSession, peer);
@@ -429,7 +441,21 @@ public class PeerManager implements PeerStateListener {
 	public void onPeerDisconnected(Peer peer) {
 		synchronized (_connectedLockObject) {
 			_connectedPeersMap.remove(peer.getHexPeerID());
-			_logger.debug("Peer {} disconnected, leaving {} connected peers", peer.getHostAddress(), _connectedPeersMap.values().size());	
-		}		
+			_logger.debug("Peer {} disconnected, leaving {} connected peers", peer.getHostAddress(), _connectedPeersMap.values().size());
+		}
+		// There is no need to monitor the number of connected peers left if the torrent session
+		// is finalizing.
+		if(_torrentSession.isFinilizing() || _torrentSession.isSeeding()) {
+			return;
+		}
+		// Check if the connected peers have fallen under too low.
+		int minTreshold = Math.min(_addressToPeerMap.size() / 2, MIN_NUMBER_OF_CONNECTED_PEERS);
+		if(_connectedPeersMap.size() < minTreshold) {
+			try {
+				_torrentSession.getAnnounceService().sendEmergencyTrackerRequest();
+			} catch (InterruptedException e) {
+				_logger.warn("Could not send an emergency tracker request: {}", e.getMessage());
+			}
+		}
 	}
 }

@@ -17,14 +17,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javax.lang.model.type.IntersectionType;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jtorrent.peer.Peer;
-import com.jtorrent.torrent.TorrentClient;
 import com.jtorrent.torrent.TorrentSession;
 import com.jtorrent.utils.Utils;
 
@@ -44,8 +42,8 @@ public class ConnectionService {
 	// The BitTorrent specification states that the range of the ports should be
 	// 6881-6889 TCP. However, the client can use basically any ephemeral port:
 	// http://www.ncftp.com/ncftpd/doc/misc/ephemeral_ports.html
-	private static final int START_PORT = 49152;
-	private static final int END_PORT = 65535;
+	public static final int START_PORT = 49152;
+	public static final int END_PORT = 65535;
 
 	private static final int NUMBER_OF_SIMULTANIOUS_CONNECTIONS = 25;
 	private static final long KEEP_ALIVE_TIME = 20;
@@ -123,25 +121,7 @@ public class ConnectionService {
 			return;
 		}
 		_registeredTorrents.remove(session.getMetaInfo().getHexInfoHash());
-	}
-
-	public void stop() {
-		_listenForConnections = false;
-		if(!_connectionService.isShutdown() && !_connectionService.isTerminated()) {
-			_connectionService.shutdown();
-		}
-		
-		if(!_listeningService.isShutdown() && !_listeningService.isTerminated()) {
-			_listeningService.shutdown();
-		}
-		
-		_connectionService = null;
-		_listeningService = null;
-		
-		for(TorrentSession ts : _registeredTorrents.values()) {
-			unregister(ts);
-		}
-	}
+	}	
 
 	public void start() throws IllegalStateException {
 		if(_socketAddress != null) {
@@ -161,6 +141,24 @@ public class ConnectionService {
 		_listeningService = Executors.newSingleThreadExecutor();
 		_listeningService.execute(new ListenTask());
 		_listenForConnections = true;
+	}
+
+	public void stop() {
+		_listenForConnections = false;
+		if(!_connectionService.isShutdown() && !_connectionService.isTerminated()) {
+			_connectionService.shutdown();
+		}
+		
+		if(!_listeningService.isShutdown() && !_listeningService.isTerminated()) {
+			_listeningService.shutdown();
+		}
+		
+		_connectionService = null;
+		_listeningService = null;
+		
+		for(TorrentSession ts : _registeredTorrents.values()) {
+			unregister(ts);
+		}
 	}
 	
 	public void cancel() throws IOException {
@@ -218,15 +216,17 @@ public class ConnectionService {
 						msg, _clientPeerID, address);
 				if(!check) {
 					_logger.warn("Invalid handshake message from {}", address.toString());
+					return;
 				}
 				
 				ByteBuffer handshake = HandshakeMessage.make(session.getMetaInfo().getInfoHash(),
 						_clientPeerID);
 				channel.write(handshake);
 				Peer peer = new Peer(channel.socket(), msg.getPeerID());
+				channel.configureBlocking(false);
 				session.getPeerManager().registerConnection(peer, channel);
 			} catch (HandshakeException | UnsupportedEncodingException e) {
-				_logger.warn("Could not parse handhskae message from {}: {}", address.toString(),
+				_logger.warn("Could not parse handhsake message from {}:{} - {}", address.toString(), channel.socket().getPort(),
 						e.getMessage());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

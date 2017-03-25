@@ -173,7 +173,7 @@ public class MessageChannel {
 			// Allocate 1 MB for the buffer.
 			ByteBuffer message = ByteBuffer.allocateDirect(1*1024*1024);
 			try {
-				 _selector = Selector.open();
+				_selector = Selector.open();
 				_socketChannel.register(_selector, SelectionKey.OP_READ);
 				
 				while(!_closed) {

@@ -47,7 +47,7 @@ public class TorrentSession {
 	private final AnnounceService _announceService;
 	private final PeerManager _peerManager;
 	private final ConnectionService _connectionService;
-	private final MultiFileStore _store;
+	private final FileStore _store;
 	private final PieceRepository _pieceRepository;
 	private Status _torrentState;
 
@@ -160,6 +160,10 @@ public class TorrentSession {
 
 	public boolean isFinilizing() {
 		return Status.FINILIZING.equals(_torrentState);
+	}
+	
+	public boolean isSeeding() {
+		return Status.SEEDING.equals(_torrentState);
 	}
 	
 	/**

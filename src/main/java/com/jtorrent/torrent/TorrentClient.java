@@ -22,7 +22,7 @@ import com.jtorrent.peer.Peer;
  * This is experimental
  */
 public class TorrentClient {
-	private static final String BITTORRENT_ID_PREFIX = "-TO0042-";
+	public static final String BITTORRENT_ID_PREFIX = "-TO0042-";
 
 	private ConnectionService _connectionService;
 	private ExecutorService _sessionExecutor;

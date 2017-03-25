@@ -16,7 +16,8 @@ public class AnnounceService {
 	
 	private final TorrentSession _session;
 	private final TierManager _tierManager;
-	ExecutorService _announceService;
+	private ExecutorService _announceService;
+	private BlockingQueue<TrackerRequestEvent> _emergencyQueue;
 
 	/**
 	 * Interval in seconds that the client should wait between sending regular
@@ -34,6 +35,8 @@ public class AnnounceService {
 		_session = session;
 		_tierManager = new TierManager(session);
 		_announceService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+		
+		_emergencyQueue = new LinkedBlockingQueue<TrackerRequestEvent>();
 	}
 
 	public TierManager getTierManager() {
@@ -86,6 +89,19 @@ public class AnnounceService {
 	public void sendCompletedMessage() throws AnnounceException, IOException {
 		_tierManager.provideTrackerClient().queryTracker(TrackerRequestEvent.COMPLETED);
 	}
+	
+	/**
+	 * Used to ask the tracker for an update peer list.
+	 * @throws InterruptedException
+	 */
+	public void sendEmergencyTrackerRequest() throws InterruptedException {
+		// If there is already an emergency request, then there is not need to 
+		// send more.
+		if(!_emergencyQueue.isEmpty()) {
+			return;
+		}
+		_emergencyQueue.put(TrackerRequestEvent.NONE);
+	}
 
 	/**
 	 * The purpose of this task is to send the initial "started" event so that
@@ -107,7 +123,7 @@ public class AnnounceService {
 		public void run() {
 			TrackerRequestEvent trackerEvent = TrackerRequestEvent.STARTED;
 			_logger.debug("Announcencing...");
-			_trackerInterval = 5;
+			_trackerInterval = 10;
 			while (!_stop) {
 				try {
 					TrackerResponseMessage response = _tierManager.provideTrackerClient().queryTracker(trackerEvent);
@@ -118,16 +134,15 @@ public class AnnounceService {
 					}
 					trackerEvent = TrackerRequestEvent.NONE;
 				} catch (AnnounceException e) {
-					// TODO log
 					_tierManager.tryNextTrackerClient();
 				} catch (IOException e) {
-					// TODO log
+					_logger.warn("could not send announce: {}", e.getMessage());
 				} catch (ResponseException e) {
-					// TODO log
+					_logger.warn("exception while handling announce response: {}", e.getMessage());
 				}
 
 				try {
-					TimeUnit.MILLISECONDS.sleep(_trackerInterval * 1000);
+					_emergencyQueue.poll(_trackerInterval * 1000, TimeUnit.MILLISECONDS);
 				} catch (InterruptedException e) {
 					// Not a problem - the task is not doing anything intensive
 					// or has a state worth saving.

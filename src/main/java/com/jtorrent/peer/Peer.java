@@ -299,7 +299,7 @@ public class Peer implements MessageListener {
 				onBitfield(repo, msg);
 				break;
 			case REQUEST:
-				// TODO - implement
+				onRequest(repo, msg);
 				break;
 			case PIECE:
 				onPiece(repo, msg);
@@ -467,16 +467,11 @@ public class Peer implements MessageListener {
 		// Send a HAVE message to all other peers.
 		_logger.debug("completed piece {} for peer {}", piece.getIndex(), getHostAddress());
 		
-		_logger.debug("Telling other peers the client completed piece #{}", piece.getIndex());
 		ByteBuffer haveMessage = HaveMessage.make(piece.getIndex());
-		_logger.debug("Made HAVE message for #{}", piece.getIndex());
 		PeerManager peerManager = _torrentSession.getPeerManager();
-		_logger.debug("Got Peer Manager #{}", piece.getIndex());
 		for(Peer peer: peerManager.getConnectedPeers()) {
 			peer.getMessageChannel().send(haveMessage);
 		}
-		_logger.debug("Peer {} successfully sent have to all peers", getHostAddress());
-		_logger.debug("handle new piece selection...");
 		// Ask for the next piece after this one has been completed.
 		repo.removeCurrentRequestedPiece(this);
 		askForNewPiece(repo);

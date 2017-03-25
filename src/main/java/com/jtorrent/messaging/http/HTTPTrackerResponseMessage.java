@@ -16,6 +16,7 @@ import com.jtorrent.messaging.announce.AnnounceException;
 import com.jtorrent.messaging.announce.TrackerRequestMessage;
 import com.jtorrent.messaging.announce.TrackerResponseMessage;
 import com.jtorrent.peer.Peer;
+import com.jtorrent.peer.PeerManager;
 import com.jtorrent.torrent.TorrentSession;
 
 public class HTTPTrackerResponseMessage extends TrackerResponseMessage {
@@ -110,6 +111,11 @@ public class HTTPTrackerResponseMessage extends TrackerResponseMessage {
 		List<Peer> peersList = new ArrayList<Peer>();
 
 		for (BObject peer : peers) {
+			// Limit the number of peers.
+			if(peersList.size() == PeerManager.MAX_TOTAL_NUMBER_OF_PEERS) {
+				break;
+			}
+			
 			Map<String, BObject> peerData = peer.asMap();
 
 			// Extract the the data in the current peer map.

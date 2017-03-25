@@ -133,7 +133,7 @@ public class HandshakeMessage {
 		if (peerID != null) {
 			if (!peerID.equals(handshake.getPeerID())) {
 				throw new HandshakeException(
-						"peer ID not matching fo channel " + peerInetAddress.toString());
+						"peer ID not matching for channel " + peerInetAddress.toString());
 			}
 		}
 
