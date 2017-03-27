@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedSet;
@@ -352,7 +351,7 @@ public class PieceRepository {
 		}
 	}
 	
-	///////////////////////// PIECE 
+	///////////////////////// PIECE /////////////////////////
 	
 	public synchronized void removeCurrentRequestedPiece(Peer peer) {
 		// Check if a requested piece exist first.

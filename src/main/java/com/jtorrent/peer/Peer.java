@@ -269,6 +269,7 @@ public class Peer implements MessageListener {
 		unbind(true);
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public void onMessageReceived(ByteBuffer message) {
 		message.rewind();

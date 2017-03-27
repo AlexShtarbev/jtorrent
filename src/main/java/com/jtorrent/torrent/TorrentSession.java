@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -50,6 +51,8 @@ public class TorrentSession {
 	private final FileStore _store;
 	private final PieceRepository _pieceRepository;
 	private Status _torrentState;
+	
+	private List<TorrentSessionEventListener> _listeners;
 
 	public TorrentSession(String torrentFileName, String destination, Peer clientPeer,
 			ConnectionService connectionService)
@@ -69,18 +72,19 @@ public class TorrentSession {
 
 		// Pieces handling
 		_pieceRepository = new PieceRepository(this);
+		_listeners = new LinkedList<TorrentSessionEventListener>();
 	}
 
 	public void start() {
+		checkTorrentCompletion();
 		// Firstly, set the status of the torrent.
 		if(!_pieceRepository.isRepositoryCompleted()) {
 			_torrentState = Status.CHECKING;
-			checkTorrentCompletion();
 			
 			_torrentState = Status.DOWNLOADING;
 		} else {
-
-			_torrentState = Status.SEEDING;
+			notifyDownloadCompleted();
+			startSeeding();
 		}
 		
 		// Start the services.
@@ -164,6 +168,16 @@ public class TorrentSession {
 	
 	public boolean isSeeding() {
 		return Status.SEEDING.equals(_torrentState);
+	}
+	
+	public void register(TorrentSessionEventListener listsner) {
+		_listeners.add(listsner);
+	}
+	
+	public void notifyDownloadCompleted() {
+		for(TorrentSessionEventListener listener : _listeners) {
+			listener.onDownloadComplete();
+		}
 	}
 	
 	/**
@@ -250,6 +264,7 @@ public class TorrentSession {
 		try {
 			_torrentState = Status.FINILIZING;
 			getFileStore().complete();
+			getFileStore().close();
 			_announceService.sendCompletedMessage();
 		} catch (IOException e) {
 			_logger.warn("could not finish downloading the file {}", e.getMessage());
@@ -258,20 +273,18 @@ public class TorrentSession {
 			_logger.warn("could not send COMPLEDTED message to tracker");
 		}
 		
+		// Notify the listeners that the download was completed.
+		notifyDownloadCompleted();
 		// FIXME
 		// stop();
 		startSeeding();
 	}
 	
-	public void startSeeding() {
+	private void startSeeding() {
 		if(Status.SEEDING.equals(_torrentState)) {
 			return;
 		}
 		
 		_torrentState = Status.SEEDING;
-	}
-	
-	public void stopSeeding() {
-		stop();
 	}
 }
