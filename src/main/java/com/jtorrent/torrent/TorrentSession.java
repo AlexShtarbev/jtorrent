@@ -36,12 +36,15 @@ public class TorrentSession {
 		FINILIZING,
 		SEEDING,
 		CHECKING,
-		DONE
+		STOPPED,
 	}
 	
 	public static final String BYTE_ENCODING = "ISO-8859-1";
 
 	private static final Logger _logger = LoggerFactory.getLogger(TorrentSession.class);
+	
+	private final String _torrentfileName;
+	private final String _destinationFolder;
 
 	private final MetaInfo _metaInfo;
 	private final SessionInfo _sessionInfo;
@@ -50,16 +53,19 @@ public class TorrentSession {
 	private final ConnectionService _connectionService;
 	private final FileStore _store;
 	private final PieceRepository _pieceRepository;
-	private Status _torrentState;
+	private Status _torrentStatus;
 	
 	private List<TorrentSessionEventListener> _listeners;
 
 	public TorrentSession(String torrentFileName, String destination, Peer clientPeer,
 			ConnectionService connectionService)
 			throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, URISyntaxException {
+		_torrentfileName = torrentFileName;
+		_destinationFolder = destination;
+		
 		_metaInfo = new MetaInfo(new File(torrentFileName));
 		_store = new MultiFileStore(_metaInfo.getInfoDictionary().getFiles(), destination);
-		_torrentState = Status.QUEUING;
+		_torrentStatus = Status.QUEUING;
 		
 		// Session information
 		_sessionInfo = new SessionInfo(clientPeer);
@@ -79,9 +85,9 @@ public class TorrentSession {
 		checkTorrentCompletion();
 		// Firstly, set the status of the torrent.
 		if(!_pieceRepository.isRepositoryCompleted()) {
-			_torrentState = Status.CHECKING;
+			_torrentStatus = Status.CHECKING;
 			
-			_torrentState = Status.DOWNLOADING;
+			_torrentStatus = Status.DOWNLOADING;
 		} else {
 			notifyDownloadCompleted();
 			startSeeding();
@@ -98,6 +104,7 @@ public class TorrentSession {
 
 	public void stop() {
 		try {
+			_torrentStatus = Status.STOPPED;
 			_announceService.stop(false);
 			_peerManager.disconnectAllConcurrently();
 			_peerManager.stop();		
@@ -121,11 +128,19 @@ public class TorrentSession {
 	 *            The response message from the tracker.
 	 */
 	public void onTrackerResponse(TrackerResponseMessage message) {
-		if(!Status.SEEDING.equals(_torrentState)) {
+		if(!Status.SEEDING.equals(_torrentStatus)) {
 			_peerManager.registerConnectionAll(message.getPeers());
 		}
 	}
 
+	public String getTorrentFileName() {
+		return _torrentfileName;
+	}
+	
+	public String getDestionationFolder() {
+		return _destinationFolder;
+	}
+	
 	/**
 	 * 
 	 * @return The metainfo information from the .torrent file.
@@ -154,8 +169,8 @@ public class TorrentSession {
 		return _pieceRepository;
 	}
 	
-	public Status getState() {
-		return _torrentState;
+	public Status getStatus() {
+		return _torrentStatus;
 	}
 	
 	public AnnounceService getAnnounceService() {
@@ -163,14 +178,14 @@ public class TorrentSession {
 	}
 
 	public boolean isFinilizing() {
-		return Status.FINILIZING.equals(_torrentState);
+		return Status.FINILIZING.equals(_torrentStatus);
 	}
 	
 	public boolean isSeeding() {
-		return Status.SEEDING.equals(_torrentState);
+		return Status.SEEDING.equals(_torrentStatus);
 	}
 	
-	public void register(TorrentSessionEventListener listsner) {
+	public synchronized void register(TorrentSessionEventListener listsner) {
 		_listeners.add(listsner);
 	}
 	
@@ -262,7 +277,7 @@ public class TorrentSession {
 		_logger.info("Last piece received and checked. Torrent has been downloaded");
 		
 		try {
-			_torrentState = Status.FINILIZING;
+			_torrentStatus = Status.FINILIZING;
 			getFileStore().complete();
 			getFileStore().close();
 			_announceService.sendCompletedMessage();
@@ -281,10 +296,10 @@ public class TorrentSession {
 	}
 	
 	private void startSeeding() {
-		if(Status.SEEDING.equals(_torrentState)) {
+		if(Status.SEEDING.equals(_torrentStatus)) {
 			return;
 		}
 		
-		_torrentState = Status.SEEDING;
+		_torrentStatus = Status.SEEDING;
 	}
 }

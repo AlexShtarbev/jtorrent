@@ -427,9 +427,9 @@ public class PeerManager implements PeerStateListener {
 		}
 		
 		public Comparator<Peer> provideRateComparator() throws IllegalStateException{
-			if(_torrentSession.getState().equals(TorrentSession.Status.DOWNLOADING)) {
+			if(_torrentSession.getStatus().equals(TorrentSession.Status.DOWNLOADING)) {
 				return new DownloadRateComparator();
-			} else if(_torrentSession.getState().equals(TorrentSession.Status.SEEDING)) {
+			} else if(_torrentSession.getStatus().equals(TorrentSession.Status.SEEDING)) {
 				return new UploadRateComparator();
 			} else {
 				throw new IllegalStateException("The torrent session is not downloading or seeding.");
