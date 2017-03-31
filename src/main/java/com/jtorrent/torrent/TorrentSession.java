@@ -3,13 +3,14 @@ package com.jtorrent.torrent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -56,6 +57,8 @@ public class TorrentSession {
 	private Status _torrentStatus;
 	
 	private List<TorrentSessionEventListener> _listeners;
+	
+	private long _checkedPieces;
 
 	public TorrentSession(String torrentFileName, String destination, Peer clientPeer,
 			ConnectionService connectionService)
@@ -81,12 +84,11 @@ public class TorrentSession {
 		_listeners = new LinkedList<TorrentSessionEventListener>();
 	}
 
-	public void start() {
+	protected void start() {	
+		_torrentStatus = Status.CHECKING;
 		checkTorrentCompletion();
 		// Firstly, set the status of the torrent.
-		if(!_pieceRepository.isRepositoryCompleted()) {
-			_torrentStatus = Status.CHECKING;
-			
+		if(!_pieceRepository.isRepositoryCompleted()) {			
 			_torrentStatus = Status.DOWNLOADING;
 		} else {
 			notifyDownloadCompleted();
@@ -102,12 +104,15 @@ public class TorrentSession {
 		}
 	}
 
-	public void stop() {
+	protected void stop(boolean isRemoved) {
 		try {
 			_torrentStatus = Status.STOPPED;
 			_announceService.stop(false);
 			_peerManager.disconnectAllConcurrently();
-			_peerManager.stop();		
+			_peerManager.stop();
+			if(isRemoved) {
+				_peerManager.cleanup();
+			}
 			_connectionService.unregister(this);
 		} catch (InterruptedException e) {
 			// Ignore.
@@ -176,6 +181,18 @@ public class TorrentSession {
 	public AnnounceService getAnnounceService() {
 		return _announceService;
 	}
+	
+	public boolean isQueuing() {
+		return Status.QUEUING.equals(_torrentStatus);
+	}
+	
+	public boolean isChecking() {
+		return Status.CHECKING.equals(_torrentStatus);
+	}
+	
+	public boolean isDownloading() {
+		return Status.DOWNLOADING.equals(_torrentStatus);
+	}
 
 	public boolean isFinilizing() {
 		return Status.FINILIZING.equals(_torrentStatus);
@@ -184,6 +201,11 @@ public class TorrentSession {
 	public boolean isSeeding() {
 		return Status.SEEDING.equals(_torrentStatus);
 	}
+	
+	public boolean isStopped() {
+		return Status.STOPPED.equals(_torrentStatus);
+	}
+	
 	
 	public synchronized void register(TorrentSessionEventListener listsner) {
 		_listeners.add(listsner);
@@ -195,45 +217,66 @@ public class TorrentSession {
 		}
 	}
 	
+	public double getCheckedPiecesPrgress() {
+		return ((double)_checkedPieces) / ((double)_pieceRepository.size());
+	}
+	
 	/**
 	 * Check how much of the torrent is present on disk.
 	 */
 	private void checkTorrentCompletion() {
 		ExecutorService exec = Executors.newCachedThreadPool();
 
-		long piecesCecked = 0;
 		int percent = 0;
 		List<Future<Boolean>> results = new ArrayList<Future<Boolean>>();
+		// In order not to overwhelm the program with threads, each few iterations
+		// the results from tasks are inspected and then the algortihm moves on
+		// with scheduling more checker tasks.
 		for (Piece p : _pieceRepository.toPieceArray()) {
 			results.add(exec.submit(new PieceChecker(p)));
 
 			if (results.size() != Runtime.getRuntime().availableProcessors())
 				continue;
 
-			for (Future<Boolean> result : results) {
-				try {
-					// Wait for the check to complete.
-					result.get();
-					piecesCecked++;
-					double checkedPercent = ((double) piecesCecked / _pieceRepository.size()) * 100;
-					if(checkedPercent > percent) {
-						_logger.info("checked " + percent + "%");
-						percent += 10;
-					}
-					
-				} catch (InterruptedException e) {
-					_logger.debug("Torrent checking has been interrupted abruptly");
-				} catch (ExecutionException e) {
-					_logger.debug("Could not retrieve the check result:" + e.getCause());
-				}
+			try {
+				handleFinishedChekers(results, percent);
+			} catch (Exception e) {
+				_logger.debug("Could not retrieve the check result:" + e.getCause());
 			}
 
 			results.clear();
+		}
+		
+		// Handle any checkers left unfinished.
+		try {
+			handleFinishedChekers(results, percent);
+		} catch (Exception e) {
+			_logger.debug("Could not retrieve the check result:" + e.getCause());
 		}
 
 		_logger.info("Have: " + _pieceRepository.completedPercent() + "%");
 		_logger.info("Have {}/{}", _pieceRepository.getCompletedPieces().cardinality(), _pieceRepository.size());
 		exec.shutdown();
+	}
+	
+	private int handleFinishedChekers(List<Future<Boolean>> results, int percent) throws Exception {
+		for (Future<Boolean> result : results) {
+			try {
+				// Wait for the check to complete.
+				result.get();
+				_checkedPieces++;
+				double checkedPercent = ((double) _checkedPieces / _pieceRepository.size()) * 100;
+				if(checkedPercent > percent) {
+					_logger.info("checked " + percent + "%");
+					percent += 10;
+				}
+				
+			} catch (Exception e) {
+				throw e;
+			}
+		}
+		
+		return percent;
 	}
 
 	/**
@@ -296,7 +339,7 @@ public class TorrentSession {
 	}
 	
 	private void startSeeding() {
-		if(Status.SEEDING.equals(_torrentStatus)) {
+		if(isSeeding()) {
 			return;
 		}
 		

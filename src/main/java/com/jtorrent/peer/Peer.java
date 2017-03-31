@@ -272,6 +272,9 @@ public class Peer implements MessageListener {
 	@SuppressWarnings("incomplete-switch")
 	@Override
 	public void onMessageReceived(ByteBuffer message) {
+		if(_torrentSession.isStopped()) {
+			return;
+		}
 		message.rewind();
 		PieceRepository repo = _torrentSession.getPieceRepository();
 		try {

@@ -3,7 +3,6 @@ package com.jtorrent.peer;
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -279,7 +278,10 @@ public class PeerManager implements PeerStateListener {
 				SocketChannel channel = handshakeResponse.getSocketChannel();
 				HandshakeMessage handshake = handshakeResponse.getHandshakeMessage();
 				Peer peer = new Peer(channel.socket(), handshake.getPeerID());
-
+				// If the torrent session has been stopped, then no new peers should be added.
+				if(_stop) {
+					return;
+				}
 				// Try to register the connection with the peer manager.
 				registerConnection(peer, channel);
 			} catch (InterruptedException e) {
@@ -298,7 +300,8 @@ public class PeerManager implements PeerStateListener {
 	public void stop() throws InterruptedException {
 		_stop = true;
 		_chokerThread.join(5000);
-		cleanup();
+		_addressToPeerMap = new HashMap<String, Peer>();
+		_idToPeerMap = new HashMap<String, Peer>(); 
 	}
 	
 	public synchronized void disconnectAllConcurrently() throws InterruptedException {
@@ -380,6 +383,9 @@ public class PeerManager implements PeerStateListener {
 		}
 		
 		public synchronized void managePeers(boolean inOptimisticRotation) {
+			if(_stop) {
+				return;
+			}
 			TreeSet<Peer> connectedPeers = new TreeSet<>(provideRateComparator());
 			connectedPeers.addAll(_connectedPeersMap.values());
 			if(connectedPeers.size() == 0) {
@@ -427,6 +433,9 @@ public class PeerManager implements PeerStateListener {
 		}
 		
 		public Comparator<Peer> provideRateComparator() throws IllegalStateException{
+			if(_stop) {
+				return null;
+			}
 			if(_torrentSession.getStatus().equals(TorrentSession.Status.DOWNLOADING)) {
 				return new DownloadRateComparator();
 			} else if(_torrentSession.getStatus().equals(TorrentSession.Status.SEEDING)) {
@@ -443,19 +452,52 @@ public class PeerManager implements PeerStateListener {
 			_connectedPeersMap.remove(peer.getHexPeerID());
 			_logger.debug("Peer {} disconnected, leaving {} connected peers", peer.getHostAddress(), _connectedPeersMap.values().size());
 		}
-		// There is no need to monitor the number of connected peers left if the torrent session
-		// is finalizing.
-		if(_torrentSession.isFinilizing() || _torrentSession.isSeeding()) {
-			return;
-		}
+		
 		// Check if the connected peers have fallen under too low.
 		int minTreshold = Math.min(_addressToPeerMap.size() / 2, MIN_NUMBER_OF_CONNECTED_PEERS);
-		if(_connectedPeersMap.size() < minTreshold) {
+		if(_connectedPeersMap.size() < minTreshold && _torrentSession.isDownloading()) {
 			try {
 				_torrentSession.getAnnounceService().sendEmergencyTrackerRequest();
 			} catch (InterruptedException e) {
 				_logger.warn("Could not send an emergency tracker request: {}", e.getMessage());
 			}
 		}
+	}
+	
+	public static class Rates {
+		private double _downloadRate;
+		private double _uploadRate;
+		
+		public Rates(double downloadRate, double uploadRate) {
+			_downloadRate = downloadRate;
+			_uploadRate = uploadRate;
+		}
+		
+		public double getDownloadRate() {
+			return _downloadRate;
+		}
+		
+		public double getDownloadRatePerSec() {
+			return _downloadRate / 1024.0;
+		}
+		
+		public double getUploadRate() {
+			return _uploadRate;
+		}
+		
+		public double getUploadRatePerSec() {
+			return _uploadRate / 1024.0;
+		}
+	}
+	
+	public Rates getRates() {
+		double totalDonwloadRate = 0;
+		double totalUploadRate = 0;
+		for (Peer peer : _connectedPeersMap.values()) {
+			totalDonwloadRate += peer.getDownloadRate().rate();
+			totalUploadRate += peer.getUploadRate().rate();
+		}
+		
+		return new Rates(totalDonwloadRate, totalUploadRate);
 	}
 }

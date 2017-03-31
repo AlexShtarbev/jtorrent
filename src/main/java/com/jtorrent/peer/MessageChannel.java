@@ -68,11 +68,6 @@ public class MessageChannel {
 	public void close() {
 		_closed = true;		
 		_messageService.shutdown();
-//		try {
-//			_messageService.awaitTermination(5, TimeUnit.SECONDS);
-//		} catch (InterruptedException e) {
-//			//Ignore - if we cannot await termination then something is wrong.
-//		}
 		if(_socketChannel.isConnected()) {
 			IOUtils.closeQuietly(_socketChannel);
 		}
@@ -184,8 +179,7 @@ public class MessageChannel {
 					while(!_closed && message.hasRemaining()) {
 						read(message);
 					}
-					
-					
+										
 					// Get ready to accept the entire message.
 					int length = message.getInt(0);
 					_logger.debug("Trying to read message with <len={}> from peer {}", length, _peer.getHostAddress());
@@ -199,7 +193,6 @@ public class MessageChannel {
 					// all interested listeners.
 					message.rewind();
 					
-
 					if(_closed) {
 						break;
 					}

@@ -84,7 +84,9 @@ public class RestoreManager {
 	}
 	
 	public void appendTorrentSession(TorrentSession session) throws JsonGenerationException, JsonMappingException, IOException {
-		
+		if (isInRestorePoint(session)) {
+			return;
+		}
 		// Create the new restore point for the torrent session
 		TorrentSessionRestorePoint restorePoint = provideRestorePoint(session);
 		
@@ -95,6 +97,17 @@ public class RestoreManager {
 		
 		// Overwrite the existing restore point with the new one.
 		updateResotreFile(lastRestore);
+	}
+	
+	public boolean isInRestorePoint(TorrentSession session) throws IOException {
+		TorrentClientRestorePoint lastRestore = getLastRestorePoint();
+		for(TorrentSessionRestorePoint torrentPoint : lastRestore.getTorrentSessions()) {
+			if(torrentPoint.getTorrentFile().equals(session.getTorrentFileName())) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public void removeTorrentSessionRestorePoint(TorrentSession session) throws JsonGenerationException, JsonMappingException, IOException {		
@@ -146,6 +159,12 @@ public class RestoreManager {
 			System.out.print(rp.toString());			
 			
 			rm.removeTorrentSessionRestorePoint(ts1);
+			rp = rm.getLastRestorePoint();
+			System.out.print(rp.toString());
+			
+			rm.appendTorrentSession(ts2);
+			rm.appendTorrentSession(ts2);
+			rm.appendTorrentSession(ts2);
 			rp = rm.getLastRestorePoint();
 			System.out.print(rp.toString());
 		} catch (Exception e) {

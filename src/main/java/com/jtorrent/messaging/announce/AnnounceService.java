@@ -33,9 +33,7 @@ public class AnnounceService {
 
 	public AnnounceService(TorrentSession session) {
 		_session = session;
-		_tierManager = new TierManager(session);
-		_announceService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
-		
+		_tierManager = new TierManager(session);		
 		_emergencyQueue = new LinkedBlockingQueue<TrackerRequestEvent>();
 	}
 
@@ -46,17 +44,11 @@ public class AnnounceService {
 	public void start() {
 		_stop = false;
 		_hardStop = false;
+		_announceService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+				new LinkedBlockingQueue<Runnable>());
 		if (!_tierManager.getTierList().isEmpty() && (!_announceService.isShutdown() && !_announceService.isTerminated()
 				&& ((ThreadPoolExecutor) _announceService).getActiveCount() == 0)) {
 			_announceService.execute(new AnnounceTask());
-		}
-	}
-
-	public void setInterval(int interval) throws InterruptedException {
-		if (interval < 0) {
-			stop(true);
-		} else {
-			setTrackerInterval(interval);
 		}
 	}
 
@@ -67,6 +59,16 @@ public class AnnounceService {
 				&& ((ThreadPoolExecutor) _announceService).getActiveCount() != 0) {
 			_announceService.shutdownNow();
 			_announceService.awaitTermination(5, TimeUnit.SECONDS);
+			_announceService = null;
+		}
+	}
+	
+
+	public void setInterval(int interval) throws InterruptedException {
+		if (interval < 0) {
+			stop(true);
+		} else {
+			setTrackerInterval(interval);
 		}
 	}
 

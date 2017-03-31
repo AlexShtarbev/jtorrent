@@ -68,6 +68,18 @@ public class TorrentClient implements TorrentSessionEventListener {
 		
 	}
 	
+	public RestoreManager getRestoreManager() {
+		return _restoreManager;
+	}
+	
+	public ConnectionService getConnectionService() {
+		return _connectionService;
+	}
+	
+	public Peer getClientPeer() {
+		return _clientPeer;
+	}
+	
 	public void start() {
 		_connectionService.start();
 		_clientPeer = new Peer(
@@ -76,14 +88,14 @@ public class TorrentClient implements TorrentSessionEventListener {
 				_connectionService.getClientPeerID());
 		
 		// Restore the previous sessions when the client is started.
-		try {
-			List<TorrentSession> sessions = _restoreManager.restroreTorrentSessions(_connectionService, _clientPeer);
-			for(TorrentSession session: sessions) {
-				startNewSession(session);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException("Unable to seatore torrent sessions: " + e.getMessage());
-		}
+//		try {
+//			List<TorrentSession> sessions = _restoreManager.restroreTorrentSessions(_connectionService, _clientPeer);
+//			for(TorrentSession session: sessions) {
+//				startNewSession(session);
+//			}
+//		} catch (Exception e) {
+//			throw new IllegalStateException("Unable to seatore torrent sessions: " + e.getMessage());
+//		}
 	}
 	
 	public void stop() {
@@ -97,23 +109,23 @@ public class TorrentClient implements TorrentSessionEventListener {
 	}	
 
 	public synchronized TorrentSession startNewSession(String fileName, String destination)
-			throws InterruptedException, ExecutionException, QueueingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, URISyntaxException {
+			throws Exception {
 		TorrentSessionTask task = new TorrentSessionTask(fileName, destination);
 		startTask(task);
 		return task.getTorrentSession();
 	}
 	
 	public synchronized void startNewSession(TorrentSession session)
-			throws InterruptedException, ExecutionException, QueueingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, URISyntaxException {
+			throws Exception {
 		TorrentSessionTask task = new TorrentSessionTask(session);
 		startTask(task);
 	}
 	
-	private synchronized void startTask(TorrentSessionTask task) throws QueueingException {
+	private synchronized void startTask(TorrentSessionTask task) throws Exception {
 		if(_activeSessions.size() + _torrentQueue.size() == MAX_TORRENTS) {
 			throw new QueueingException("Reach max number of torrents.");
 		}
-		
+		_restoreManager.appendTorrentSession(task.getTorrentSession());
 		if(_downloading == MAX_DOWNLOADING_TORRENTS) {
 			_torrentQueue.add(task);
 		} else {
@@ -124,10 +136,6 @@ public class TorrentClient implements TorrentSessionEventListener {
 	
 	private synchronized void addNewActiveSession(TorrentSession session) {
 		_activeSessions.add(session);
-	}	
-
-	public ConnectionService getConnectionService() {
-		return _connectionService;
 	}
 	
 	@Override
@@ -164,16 +172,30 @@ public class TorrentClient implements TorrentSessionEventListener {
 		}
 	}
 	
-	public synchronized void stopTorrentSession(TorrentSession session) {
-		if(session.getStatus().equals(Status.QUEUING)) {
+	public synchronized void resumeTorrentSession(TorrentSession session) {
+		if(session.isQueuing()) {
 			return;
 		}
 		
-		session.stop();
+		session.start();
+	}
+	
+	public synchronized void stopTorrentSession(TorrentSession session) {
+		if(session.isQueuing()) {
+			return;
+		}
+		
+		session.stop(false);
 	}
 	
 	public synchronized void removeTorrentSession(TorrentSession session) {
-		if(session.getStatus().equals(Status.QUEUING)) {
+		try {
+			_restoreManager.removeTorrentSessionRestorePoint(session);
+		} catch (Exception e) {
+			_logger.warn("Could not remove resotre point for {}: e", session.getTorrentFileName(),
+					e.getMessage());
+		}
+		if(session.isQueuing()) {
 			for(TorrentSessionTask task : _torrentQueue) {
 				if(task.getTorrentSession().equals(session)) {
 					_torrentQueue.remove(task);
@@ -183,7 +205,13 @@ public class TorrentClient implements TorrentSessionEventListener {
 		}
 		
 		_activeSessions.remove(session);
-		session.stop();
+		session.stop(true);
+	}
+	
+	public void shutdown() {
+		for(TorrentSession session : _activeSessions) {
+			session.stop(true);
+		}
 	}
 
 	@SuppressWarnings("serial")
@@ -205,13 +233,13 @@ public class TorrentClient implements TorrentSessionEventListener {
 		// "D:/Movie/assas.torrent", "D:/Movie/dir"
 		TorrentClient client = new TorrentClient();
 		client.start();
-		/*try {
-			client.startNewSession("D:/Movie/orig.torrent", "D:/Movie/dir");
-			//client.startNewSession("D:/Movie/vamp.torrent", "D:/Movie/dir");
+		try {
+			//client.startNewSession("D:/Movie/orig.torrent", "D:/Movie/dir");
+			client.startNewSession("D:/Movie/vamp.torrent", "D:/Movie/dir");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 	}
 
 
