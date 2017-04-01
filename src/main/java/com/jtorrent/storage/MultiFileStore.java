@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,8 @@ public class MultiFileStore implements FileStore {
 	 * The aggregate size of the files.
 	 */
 	private long _size;
+	
+	private final List<String> _fileNames;
 
 	public MultiFileStore(List<FileDictionary> files, String parentDir) throws IOException {
 		if (parentDir == null || !(new File(parentDir)).isDirectory()) {
@@ -42,6 +45,7 @@ public class MultiFileStore implements FileStore {
 
 		_fileStores = new ArrayList<FileStore>();
 		_beginMap = new HashMap<FileStore, Long>();
+		_fileNames = new LinkedList<String>();
 		_size = 0;
 		for (FileDictionary file : files) {
 			File actual = new File(parentDir, file.getFile().getPath());
@@ -50,6 +54,7 @@ public class MultiFileStore implements FileStore {
 			
 			SingleFileStore store = new SingleFileStore(actual, file.getLength());
 			_fileStores.add(store);
+			_fileNames.add(actual.getName());
 			_beginMap.put(store, _size);
 			_size += file.getLength();
 		}
@@ -59,6 +64,10 @@ public class MultiFileStore implements FileStore {
 		return _size;
 	}
 
+	public List<String> getFileNames() {
+		return _fileNames;
+	}
+	
 	@Override
 	public int read(ByteBuffer data, long begin) throws IOException {
 		int size = data.remaining();

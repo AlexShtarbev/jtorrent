@@ -105,18 +105,27 @@ public class TorrentSession {
 	}
 
 	protected void stop(boolean isRemoved) {
-		try {
-			_torrentStatus = Status.STOPPED;
-			_announceService.stop(false);
-			_peerManager.disconnectAllConcurrently();
-			_peerManager.stop();
-			if(isRemoved) {
-				_peerManager.cleanup();
+		_torrentStatus = Status.STOPPED;
+		// Make disconnecting happen in the background.
+		Thread th = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					_announceService.stop(false);
+					_peerManager.disconnectAllConcurrently();
+					_peerManager.stop();									
+				} catch (InterruptedException e) {
+					// Ignore.
+				}
+				if(isRemoved) {
+					_peerManager.cleanup();
+				}
+				_connectionService.unregister(TorrentSession.this);			
 			}
-			_connectionService.unregister(this);
-		} catch (InterruptedException e) {
-			// Ignore.
-		}
+		});
+		th.setDaemon(true);
+		th.start();
 	}
 
 	/**
@@ -168,6 +177,10 @@ public class TorrentSession {
 
 	public FileStore getFileStore() {
 		return _store;
+	}
+	
+	public List<String> getFileNames() {
+		return _store.getFileNames();
 	}
 
 	public PieceRepository getPieceRepository() {

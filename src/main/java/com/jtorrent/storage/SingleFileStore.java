@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -135,5 +136,10 @@ public class SingleFileStore implements FileStore {
 
 	public File getFile() {
 		return _file;
+	}
+
+	@Override
+	public List<String> getFileNames() {
+		throw new UnsupportedOperationException();
 	}
 }

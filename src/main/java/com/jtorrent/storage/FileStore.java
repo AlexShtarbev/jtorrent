@@ -2,6 +2,7 @@ package com.jtorrent.storage;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
  * An abstract file store the serves as a layer above standard file operations
@@ -64,5 +65,7 @@ public interface FileStore {
 	 */
 	public boolean isComplete();
 
+	public List<String> getFileNames();
+	
 	public long size();
 }
