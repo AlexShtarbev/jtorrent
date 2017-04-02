@@ -178,7 +178,8 @@ public class Peer implements MessageListener {
 		return _messageChannel;
 	}
 	
-	public synchronized void bind(TorrentSession torrentSession, SocketChannel socketChannel) throws IOException {
+	public synchronized void bind(TorrentSession torrentSession, SocketChannel socketChannel) 
+			throws IOException {
 		_torrentSession = torrentSession;
 		unbind(true);
 		_messageChannel = MessageChannel.open(socketChannel, _torrentSession, this);
@@ -309,6 +310,7 @@ public class Peer implements MessageListener {
 				onPiece(repo, msg);
 				break;
 			}
+			
 		} catch (MessageExchangeException e) {
 			_logger.debug("received Exception {} from peer {}", e.getMessage(), getHexPeerID());
 		}
@@ -317,26 +319,29 @@ public class Peer implements MessageListener {
 	
 	private void onChoke(PieceRepository repo) {
 		_logger.debug("received CHOKE from peer {}", getHostAddress());
-		synchronized (_messageLock) {
-			_peerChoking = true;
-			Piece piece = repo.getDownloadingPiece(this);
-			if(piece != null) {
-				repo.setPeerHavePiece(this, piece.getIndex(), false);
-				cancelAllRequests();
-			}
+	
+		_peerChoking = true;
+		Piece piece = repo.getDownloadingPiece(this);
+		if(piece != null) {
+			repo.setPeerHavePiece(this, piece.getIndex(), false);
+			cancelAllRequests();
 		}
 	}
 	
 	private void onUnchoke(PieceRepository repo) {
 		_logger.debug("received UNCHOKE from peer {}", getHostAddress());
-		synchronized (_messageLock) {			
-			_peerChoking = false;
-			askForNewPiece(repo);
-		}		
+			
+		_peerChoking = false;
+		askForNewPiece(repo);
 	}
 
 	private void askForNewPiece(PieceRepository repo) {
+		if(repo.isDownloadingPiece(this)) {
+			return;
+		}
+		
 		_logger.debug("Peer {} asking for new piece", getHostAddress());
+		
 		Piece piece = repo.selectNextPiece(this);
 		if(piece != null) {
 			sendBlockRequests(repo);
@@ -355,58 +360,52 @@ public class Peer implements MessageListener {
 	
 	private void onInterested() {
 		_logger.debug("received INTERESTED from peer {}", getHostAddress());
-		synchronized (_messageLock) {
-			_peerInterested = true;
-		}
+		_peerInterested = true;
 	}
 	
 	private void onNotInterested() {
 		_logger.debug("received NOT_INTERESTED from peer {}", getHostAddress());
-		synchronized (_messageLock) {
-			_peerInterested = false;
-		}
+	
+		_peerInterested = false;
 	}
 	
 	private void onHave(PieceRepository repo, Message msg) {
-		_logger.debug("received HAVE from peer {}", getHostAddress());
-		synchronized (_messageLock) {
-			HaveMessage haveMessage = (HaveMessage)msg;
-			Piece piece = repo.get(haveMessage.getPieceIndex());
-			
-			// If the client is not downloading the piece or if it dies not have it
-			// downloaded, then the client should start communicating with the peer
-			// by becoming interested in it.
-			if(repo.isPieceToBeDownloaded(piece.getIndex())) {
-				setAmInterested(true);
-			}
-			
-			// Update the piece repository.
-			repo.setPeerHavePiece(this, haveMessage.getPieceIndex(), true);
-			// If the peer has not started downloading a piece - ask for one.
-			// Some peers send an incomplete bit field and the follow it up
-			// with have messages. This is why it is a good idea to ask for
-			// a new piece, if possible, when a HAVE message arrives.
-			if(!_peerChoking && _amInterested && !repo.isDownloadingPiece(this)) {
-				askForNewPiece(repo);
-			}			
-		}	
+		_logger.debug("received HAVE from peer {}", getHostAddress());	
+		HaveMessage haveMessage = (HaveMessage)msg;
+		Piece piece = repo.get(haveMessage.getPieceIndex());
+		
+		// If the client is not downloading the piece or if it dies not have it
+		// downloaded, then the client should start communicating with the peer
+		// by becoming interested in it.
+		if(repo.isPieceToBeDownloaded(piece.getIndex())) {
+			setAmInterested(true);
+		}
+		
+		// Update the piece repository.
+		repo.setPeerHavePiece(this, haveMessage.getPieceIndex(), true);
+		// If the peer has not started downloading a piece - ask for one.
+		// Some peers send an incomplete bit field and the follow it up
+		// with have messages. This is why it is a good idea to ask for
+		// a new piece, if possible, when a HAVE message arrives.
+		if(!_peerChoking && _amInterested && !repo.isDownloadingPiece(this)) {
+			askForNewPiece(repo);
+		}		
 	}
 	
 	private void onBitfield(PieceRepository repo, Message msg) {
 		_logger.debug("received BITFIELD from peer {}", getHostAddress());
-		synchronized (_messageLock) {			
-			BitfieldMessage bitfieldMessage = (BitfieldMessage) msg;
-			repo.followPeer(this, bitfieldMessage.getBitField());
-			
-			// If the peer has pieces that the client can download,
-			// the the client is interested in the peer. Otherwise-
-			// it is not.
-			_logger.debug("Peer {} has {} available pieces.", getHostAddress(), repo.provideDownloadablePieces(this).cardinality());
-			if (repo.provideDownloadablePieces(this).cardinality() == 0) {
-				setAmInterested(false);
-			} else {
-				setAmInterested(true);
-			}
+				
+		BitfieldMessage bitfieldMessage = (BitfieldMessage) msg;
+		repo.followPeer(this, bitfieldMessage.getBitField());
+		
+		// If the peer has pieces that the client can download,
+		// the the client is interested in the peer. Otherwise-
+		// it is not.
+		_logger.debug("Peer {} has {} available pieces.", getHostAddress(), repo.provideDownloadablePieces(this).cardinality());
+		if (repo.provideDownloadablePieces(this).cardinality() == 0) {
+			setAmInterested(false);
+		} else {
+			setAmInterested(true);
 		}
 	}
 	
@@ -416,58 +415,72 @@ public class Peer implements MessageListener {
 		repo.markBlockCompleted(this, pieceMessage.getBegin());
 		// Update the downloaded data rate.
 		_downloadRate.accumulate(pieceMessage.getBlock().capacity());
+		
+		if(piece.isOnDisk()) {
+			// If the piece is already on disk request to download a new one
+			// by removing the current requested piece in the repository and
+			// all the existing block requests.
+			if (piece.equals(repo.getDownloadingPiece(this))) {
+				repo.removeCurrentRequestedPiece(this);
+				//cancelAllRequests();
+				askForNewPiece(repo);
+			}
+			return;
+		}
+		
+		try {
+			// FIXME
+			/*if(repo.hasReachedEndgame()) {
+				handleEndgameBlock(repo, pieceMessage);
+			} else {*/
+				repo.writeBlock(piece.getIndex(), pieceMessage.getBlock(),
+						pieceMessage.getBegin());
+			//}
 			
-		synchronized (_messageLock) {
-			if(piece.isOnDisk()) {
-				// If the piece is already on disk request to download a new one
-				// by removing the current requested piece in the repository and
-				// all the existing block requests.
+			if(piece.isComplete()) {
 				onPieceComplete(repo, piece);
 			} else {
-				try {
-					if(repo.hasReachedEndgame()) {
-						handleEndgameBlock(repo, pieceMessage);
-					} else {
-						repo.writeBlock(piece.getIndex(), pieceMessage.getBlock(),
-								pieceMessage.getBegin());
-					}
-					
-					if(piece.isComplete()) {
-						onPieceComplete(repo, piece);
-					} else {
-						// The piece has not been completed. Ask for a new piece.
-						_logger.debug("Received block {}; asking for more blocks from peer {}...", pieceMessage.getBegin(), getHostAddress());
-						sendBlockRequests(repo);
-					}
-					// Check if the torrent has been completely downloaded.
-					if(repo.size() == repo.getNumberOfcompletedPieces() &&
-							!_torrentSession.isFinilizing()) {
-						_torrentSession.onTorrentDownloaded(repo);
-					}
-				} catch (IOException | IllegalStateException e) {
-					_logger.warn("{} in peer {}", e, getHexPeerID());
-				}
+				// The piece has not been completed. Ask for a new piece.
+				_logger.debug("Received block {}; asking for more blocks from peer {}...", pieceMessage.getBegin(), getHostAddress());
+				sendBlockRequests(repo);
 			}
+			// Check if the torrent has been completely downloaded.
+			if(repo.size() == repo.getNumberOfcompletedPieces() &&
+					!_torrentSession.isFinilizing()) {
+				_torrentSession.onTorrentDownloaded(repo);
+			}
+		} catch (IOException | IllegalStateException e) {
+			_logger.warn("{} in peer {}", e, getHexPeerID());
 		}
+		
 	}
 	
 	private void handleEndgameBlock(PieceRepository repo, PieceMessage pieceMessage) throws IllegalStateException, IOException {
 		Piece piece = repo.get(pieceMessage.getPieceIndex());
-		if(repo.checkPieceHasBlock(piece.getIndex(), pieceMessage.getBegin(),
-				pieceMessage.getBlock().duplicate())) {
+		if(repo.checkPieceHasBlock(piece.getIndex(), pieceMessage.getBegin())) {
 			_logger.debug("Piece {} already has block {}", piece.getIndex(),
 					pieceMessage.getBegin());
 		} else {
 			repo.writeBlock(piece.getIndex(), pieceMessage.getBlock(),
 					pieceMessage.getBegin());
-			
-			// Cancel the piece form the rest of the peers.
-			cancelPiece(piece.getIndex(), pieceMessage.getBegin(),
-					pieceMessage.getBlock().duplicate());
+		
+			// FIXME
+			/*// Cancel the piece form the rest of the peers.
+			Thread th = new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					cancelPiece(piece.getIndex(), pieceMessage.getBegin(),
+							pieceMessage.getBlock().duplicate());	
+				}
+			});
+			th.setDaemon(true);
+			th.start();
+			*/
 		}
 	}
 	
-	private synchronized void onPieceComplete(PieceRepository repo, Piece piece) {
+	private void onPieceComplete(PieceRepository repo, Piece piece) {
 		// Send a HAVE message to all other peers.
 		_logger.debug("completed piece {} for peer {}", piece.getIndex(), getHostAddress());
 		
@@ -481,7 +494,7 @@ public class Peer implements MessageListener {
 		askForNewPiece(repo);
 	}
 	
-	private synchronized void onRequest(PieceRepository repo, Message msg) {
+	private void onRequest(PieceRepository repo, Message msg) {
 		// We should watch put for choked peers who send requests. The BitTorrent protocol
 		// states that in this case all of the peers requests are to be dropped. Same goes
 		// for the occasion when the client is asked for a piece it does not have.
@@ -513,7 +526,7 @@ public class Peer implements MessageListener {
 		sendPieceResponse(repo, reqMsg);
 	}
 	
-	private synchronized void sendPieceResponse(PieceRepository repo, RequestMessage reqMsg) {
+	private void sendPieceResponse(PieceRepository repo, RequestMessage reqMsg) {
 		try {
 			ByteBuffer block = repo.readBlock(reqMsg.getPieceIndex(), reqMsg.getBegin(), reqMsg.getLength());
 			ByteBuffer pieceMessage = PieceMessage.make(reqMsg.getPieceIndex(), reqMsg.getBegin(), block);

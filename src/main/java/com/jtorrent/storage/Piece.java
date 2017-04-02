@@ -1,6 +1,8 @@
 package com.jtorrent.storage;
 
 import java.nio.ByteBuffer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>
@@ -37,6 +39,8 @@ public class Piece implements Comparable<Piece>{
 	private final long _size;
 	private ByteBuffer _data;
 	private long _remaining;
+	
+	private Set<Integer> _blockSet;
 
 	/**
 	 * Each piece has a hash that is extracted from the meta info file.
@@ -112,21 +116,8 @@ public class Piece implements Comparable<Piece>{
 		_onDisk = onDisk;
 	}
 	
-	public synchronized boolean hasBlock(int blockBegin, byte[] block) {
-		if(_data == null) {
-			return false;
-		}
-		ByteBuffer dataClone = _data.duplicate();
-		dataClone.position(blockBegin);
-		byte[] bytes = new byte[block.length];
-		dataClone.get(bytes);
-		for(int i = 0; i < bytes.length; i++) {
-			if(bytes[i] != block[i]) {
-				return false;
-			}
-		}
-		
-		return true;
+	public synchronized boolean hasBlock(int blockBegin) {
+		return _blockSet.contains(blockBegin);
 	}
 
 	public synchronized void addBlock(ByteBuffer block, int blockBegin) {
@@ -145,8 +136,13 @@ public class Piece implements Comparable<Piece>{
 		if (_data == null /*|| blockBegin == 0*/) {
 			_data = ByteBuffer.allocate((int) _size);
 			_remaining = _size;
+			_blockSet = new HashSet<>();
 		}
 		
+		if(hasBlock(blockBegin)) {
+			return;
+		}
+		_blockSet.add(blockBegin);
 		// Mark he amount of bytes that need to be written to complete the
 		// piece.
 		block.rewind();
@@ -162,7 +158,7 @@ public class Piece implements Comparable<Piece>{
 	 * @return <b>true</b> if the piece has received all its blocks;
 	 *         <b>false</b> - if it still needs to receive more blocks.
 	 */
-	public boolean isComplete() {
+	public synchronized boolean isComplete() {
 		return _remaining == 0;
 	}
 	

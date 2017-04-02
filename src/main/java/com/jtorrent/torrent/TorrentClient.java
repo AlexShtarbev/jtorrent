@@ -8,18 +8,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.jtorrent.messaging.announce.ConnectionService;
 import com.jtorrent.peer.Peer;
-import com.jtorrent.torrent.TorrentSession.Status;
 import com.jtorrent.torrent.restore.RestoreManager;
 
 /**
@@ -227,7 +223,6 @@ public class TorrentClient implements TorrentSessionEventListener {
 		
 	// FIXME - remove
 	public static void main(String[] args) {
-
 		// Future<Boolean> result2 = es.submit(new SessionTask(clientPeer,
 		// "D:/Movie/t1.torrent", "D:/Movie/dir"));
 		// "D:/Movie/assas.torrent", "D:/Movie/dir"
@@ -235,12 +230,12 @@ public class TorrentClient implements TorrentSessionEventListener {
 		client.start();
 		try {
 			//client.startNewSession("D:/Movie/orig.torrent", "D:/Movie/dir");
-			client.startNewSession("D:/Movie/vamp.torrent", "D:/Movie/dir");
+			//client.startNewSession("D:/Movie/vamp.torrent", "D:/Movie/dir");
+			client.startNewSession("D:/Movie/cs.torrent", "D:/Movie/dir");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
 
 }

@@ -87,7 +87,7 @@ public class PieceRepository {
 		_peerBitSetMap = new HashMap<String, BitSet>();
 		_pieceSelector = new RarestFirstSelector();
 	}
-
+	
 	private void addPieces(ByteBuffer hashes, InfoDictionary info) {
 		hashes.clear();
 		for (int index = 0; index < _pieces.length; index++) {
@@ -184,7 +184,7 @@ public class PieceRepository {
 		piece.addBlock(block, blockBegin);
 		// Only when the piece has had all it's blocks added, can it be stored
 		// on disk.
-		_logger.debug("[BLOCK]Piece {} has {}", pieceIndex, piece.getRemaining());
+		_logger.debug("[BLOCK]Piece {} has {} remaining", pieceIndex, piece.getRemaining());
 		if (piece.isComplete()) {
 			try {
 				_fileStore.write(piece.getData(), piece.getBegin());
@@ -241,14 +241,8 @@ public class PieceRepository {
 		return res;
 	}
 
-	public synchronized boolean checkPieceHasBlock(int pieceIndex, int blockBegin, ByteBuffer block) {
-		if (block == null){
-			return true;
-		}
-		block.rewind();
-		byte[] bb = new byte[block.remaining()];
-		block.get(bb);
-		return _pieces[pieceIndex].hasBlock(blockBegin, bb);
+	public synchronized boolean checkPieceHasBlock(int pieceIndex, int blockBegin) {
+		return _pieces[pieceIndex].hasBlock(blockBegin);
 	}
 	
 	public int size() {
@@ -287,7 +281,7 @@ public class PieceRepository {
 		return _completedPieces.cardinality();
 	}
 
-	public double completedPercent() {
+	public synchronized double completedPercent() {
 		double percent = ((double) _completedPieces.cardinality() / _pieces.length) * 100;
 		return percent;
 	}
@@ -343,6 +337,7 @@ public class PieceRepository {
 				updatePieceFrequency(i, false);
 			}
 		}
+		
 		RequestedPiece reqPiece = _requestedPiecesMap.remove(peer.getHexPeerID());
 		if(reqPiece != null) {
 			_inFlightPieces.set(reqPiece.getPiece().getIndex(), false);
@@ -353,13 +348,16 @@ public class PieceRepository {
 	
 	///////////////////////// PIECE /////////////////////////
 	
-	public synchronized void removeCurrentRequestedPiece(Peer peer) {
-		// Check if a requested piece exist first.
-		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(rp == null) {
-			return;
+	public void removeCurrentRequestedPiece(Peer peer) {
+		synchronized (peer) {
+			// Check if a requested piece exist first.
+			RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
+			if(rp == null) {
+				return;
+			}
+			
+			_requestedPiecesMap.put(peer.getHexPeerID(), null);
 		}
-		_requestedPiecesMap.remove(peer.getHexPeerID());
 	}
 	
 	/**
@@ -367,11 +365,13 @@ public class PieceRepository {
 	 * @param peer The peer whose bit set is to be updated.
 	 * @param index The index of the piece in the bit set
 	 */
-	public synchronized void setPeerHavePiece(Peer peer, int index, boolean have) {
-		updatePieceFrequency(index, have);
-		BitSet pieceSet = _peerBitSetMap.get(peer.getHexPeerID());
-		pieceSet.set(index);
-		_peerBitSetMap.put(peer.getHexPeerID(), pieceSet);
+	public void setPeerHavePiece(Peer peer, int index, boolean have) {
+		synchronized (peer) {
+			updatePieceFrequency(index, have);
+			BitSet pieceSet = _peerBitSetMap.get(peer.getHexPeerID());
+			pieceSet.set(index);
+			_peerBitSetMap.put(peer.getHexPeerID(), pieceSet);
+		}
 	}
 	
 	/**
@@ -396,30 +396,36 @@ public class PieceRepository {
 	 * @param peer The peer whose next piece is to be chosen.
 	 */
 	public synchronized Piece selectNextPiece(Peer peer) throws IllegalStateException {
-		RequestedPiece requestedPiece = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(requestedPiece != null) {
-			throw new IllegalStateException("Peer #" + peer.getHostAddress() + " has piece in flight.");
+		Piece piece = null;
+		synchronized(peer) {
+			RequestedPiece requestedPiece = _requestedPiecesMap.get(peer.getHexPeerID());
+			if(requestedPiece != null) {
+				throw new IllegalStateException("Peer #" + peer.getHostAddress() + " has piece in flight.");
+			}
+			
+			piece = _pieceSelector.select(peer);
+			if(piece == null) {
+				return null;
+			}
+			_inFlightPieces.set(piece.getIndex());
+			requestedPiece = new RequestedPiece(piece);
+			_requestedPiecesMap.put(peer.getHexPeerID(), requestedPiece);
 		}
-		
-		Piece piece = _pieceSelector.select(peer);
-		if(piece == null) {
-			return null;
-		}
-		_inFlightPieces.set(piece.getIndex());
-		requestedPiece = new RequestedPiece(piece);
-		_requestedPiecesMap.put(peer.getHexPeerID(), requestedPiece);
 		
 		_logger.debug("chose piece {} for peer {}", piece.getIndex(), peer.getHostAddress());
+		
 		return piece;
 	}
 	
-	public synchronized Piece getDownloadingPiece(Peer peer) {
-		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(rp == null) {
-			return null;
+	public Piece getDownloadingPiece(Peer peer) {
+		synchronized (peer) {
+			RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
+			if(rp == null) {
+				return null;
+			}
+			
+			return rp.getPiece();
 		}
-		
-		return rp.getPiece();
 	}
 	
 	public synchronized BitSet getCompletedPieces() {
@@ -446,8 +452,10 @@ public class PieceRepository {
 	
 	///////////////////////// BLOCK
 	
-	public synchronized boolean isDownloadingPiece(Peer peer) {
-		return _requestedPiecesMap.get(peer.getHexPeerID()) != null;
+	public boolean isDownloadingPiece(Peer peer) {
+		synchronized (peer) {
+			return _requestedPiecesMap.get(peer.getHexPeerID()) != null;
+		}
 	}
 	
 	/**
@@ -455,39 +463,47 @@ public class PieceRepository {
 	 * @param peer The peer which requests the blocks.
 	 * @return A list of blocks that are to be downloaded.
 	 */
-	public synchronized LinkedBlockingQueue<ByteBuffer> requestBlocks(Peer peer) {		
-		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(rp == null) {
-			return null;
+	public LinkedBlockingQueue<ByteBuffer> requestBlocks(Peer peer) {
+		synchronized (peer) {
+			RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
+			if(rp == null) {
+				return null;
+			}
+			
+			return rp.provideBlocks();
 		}
-		
-		return rp.provideBlocks();
 	}
 	
-	public synchronized void markBlockCompleted(Peer peer, int blockBegin) {
-		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(rp == null) {
-			return;
+	public void markBlockCompleted(Peer peer, int blockBegin) {
+		synchronized (peer) {
+			RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
+			if(rp == null) {
+				return;
+			}
+			
+			rp.blockCompleted(blockBegin);
 		}
-		
-		rp.blockCompleted(blockBegin);
 	}
 	
-	public synchronized BlockingQueue<Block> getBlocksInFlight(Peer peer) {
-		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(rp == null) {
-			return null;
+	public BlockingQueue<Block> getBlocksInFlight(Peer peer) {
+		synchronized (peer) {
+			RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
+			if(rp == null) {
+				return null;
+			}
+			return rp.getBlocksInFlight();
 		}
-		return rp.getBlocksInFlight();
 	}
 	
-	public synchronized void cancelAllRequestedBlocks(Peer peer) {
-		RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
-		if(rp == null) {
-			return;
+	public void cancelAllRequestedBlocks(Peer peer) {
+		synchronized (peer) {
+			RequestedPiece rp = _requestedPiecesMap.get(peer.getHexPeerID());
+			if(rp == null) {
+				return;
+			}
+			
+			_requestedPiecesMap.put(peer.getHexPeerID(), null);
 		}
-		
-		_requestedPiecesMap.remove(peer.getHexPeerID());
 	}
 	
 	public synchronized boolean hasReachedEndgame() {
@@ -513,27 +529,25 @@ public class PieceRepository {
 			return _piece;
 		}
 		
-		public synchronized LinkedBlockingQueue<ByteBuffer> provideBlocks() {
+		public LinkedBlockingQueue<ByteBuffer> provideBlocks() {
 			if(_blocksInFlight.size() == REQUESTED_BLOCKS_QUEUE_SIZE) {
 				return null;
 			}
 			
 			LinkedBlockingQueue<ByteBuffer> messages = new LinkedBlockingQueue<>();
 			while(_blocksInFlight.remainingCapacity() > 0 && _lastBlock < _piece.getSize()) {
-				int length = (int) Math.min((int)_piece.getSize() - _lastBlock, RequestMessage.DEFAULT_REQUEST_SIZE);
-				if(_lastBlock == 245760) {
-					_logger.debug("[LAST BLOCK] size {} for piece {}", length,_piece.getIndex());
-				}
+				int length = (int) Math.min((int)_piece.getSize() - _lastBlock,
+						RequestMessage.DEFAULT_REQUEST_SIZE);
 				ByteBuffer msg = RequestMessage.make(_piece.getIndex(), _lastBlock, length);
 				messages.add(msg);
 				_blocksInFlight.add(new Block(_piece.getIndex(), _lastBlock, length));
 				_lastBlock += length;
 			}
-			_logger.debug("Sending {} blocks ({} last) with {} remaining block for piece {}({})", messages.size(), _lastBlock, REQUESTED_BLOCKS_QUEUE_SIZE - _blocksInFlight.size(), _piece.getIndex(), _piece.getSize());
+			_logger.debug("Sending {} blocks ({} last) with {} remaining block for piece {}({})", messages.size(), _lastBlock, _blocksInFlight.size(), _piece.getIndex(), _piece.getSize());
 			return messages;
 		}
 		
-		public synchronized void blockCompleted(int blockBegin) {
+		public void blockCompleted(int blockBegin) {
 			if(_blocksInFlight == null) {
 				return;
 			}
@@ -548,7 +562,7 @@ public class PieceRepository {
 			_logger.debug("Completed block # {} - blocks in flight for piece {} are {}", blockBegin, _piece.getIndex(), _blocksInFlight.size());
 		}
 		
-		public synchronized BlockingQueue<Block> getBlocksInFlight() {
+		public BlockingQueue<Block> getBlocksInFlight() {
 			return _blocksInFlight;
 		}
 	}
@@ -618,16 +632,15 @@ public class PieceRepository {
 			// that end game is reached. For this reason the in-flight pieces are not 
 			// included in calculating the free piece set and the same pieces can be
 			// requested by different peers.
-			if(freePieceSet.cardinality() == 0) {
+			if (freePieceSet.cardinality() == 0) {
 				freePieceSet = (BitSet) _peerBitSetMap.get(peer.getHexPeerID()).clone();
 				freePieceSet.andNot(_completedPieces);
-				if(!hasFreePieces(peer, freePieceSet)) {
+				if (!hasFreePieces(peer, freePieceSet)) {
 					_logger.debug("No piece found for peer {}", peer.getHostAddress());
 					return null;
 				}
 			}
-			
-			
+
 			return selectRarest(freePieceSet);
 		}
 		

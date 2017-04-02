@@ -3,8 +3,6 @@ package com.jtorrent.torrent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -112,9 +110,12 @@ public class TorrentSession {
 			@Override
 			public void run() {
 				try {
-					_announceService.stop(false);
+					_announceService.stop(true);
 					_peerManager.disconnectAllConcurrently();
-					_peerManager.stop();									
+					_peerManager.stop();
+					if(isRemoved) {
+						_peerManager.cleanup();
+					}
 				} catch (InterruptedException e) {
 					// Ignore.
 				}
@@ -126,6 +127,19 @@ public class TorrentSession {
 		});
 		th.setDaemon(true);
 		th.start();
+		// FIXME
+		/*try {
+			_announceService.stop(true);
+			_peerManager.disconnectAllConcurrently();
+			_peerManager.stop();
+			if(isRemoved) {
+				_peerManager.cleanup();
+			}
+			_connectionService.unregister(TorrentSession.this);		
+		} catch (InterruptedException e) {
+			// Ignore.
+		}*/
+		
 	}
 
 	/**
@@ -243,7 +257,7 @@ public class TorrentSession {
 		int percent = 0;
 		List<Future<Boolean>> results = new ArrayList<Future<Boolean>>();
 		// In order not to overwhelm the program with threads, each few iterations
-		// the results from tasks are inspected and then the algortihm moves on
+		// the results from tasks are inspected and then the algorithm moves on
 		// with scheduling more checker tasks.
 		for (Piece p : _pieceRepository.toPieceArray()) {
 			results.add(exec.submit(new PieceChecker(p)));
@@ -252,7 +266,7 @@ public class TorrentSession {
 				continue;
 
 			try {
-				handleFinishedChekers(results, percent);
+				percent = handleFinishedChekers(results, percent);
 			} catch (Exception e) {
 				_logger.debug("Could not retrieve the check result:" + e.getCause());
 			}
@@ -262,7 +276,7 @@ public class TorrentSession {
 		
 		// Handle any checkers left unfinished.
 		try {
-			handleFinishedChekers(results, percent);
+			percent = handleFinishedChekers(results, percent);
 		} catch (Exception e) {
 			_logger.debug("Could not retrieve the check result:" + e.getCause());
 		}
@@ -346,8 +360,7 @@ public class TorrentSession {
 		
 		// Notify the listeners that the download was completed.
 		notifyDownloadCompleted();
-		// FIXME
-		// stop();
+		
 		startSeeding();
 	}
 	
