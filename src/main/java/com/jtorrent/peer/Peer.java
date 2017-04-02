@@ -422,20 +422,24 @@ public class Peer implements MessageListener {
 			// all the existing block requests.
 			if (piece.equals(repo.getDownloadingPiece(this))) {
 				repo.removeCurrentRequestedPiece(this);
-				//cancelAllRequests();
 				askForNewPiece(repo);
 			}
 			return;
 		}
 		
 		try {
-			// FIXME
-			/*if(repo.hasReachedEndgame()) {
-				handleEndgameBlock(repo, pieceMessage);
-			} else {*/
-				repo.writeBlock(piece.getIndex(), pieceMessage.getBlock(),
-						pieceMessage.getBegin());
-			//}
+			try {
+				if(repo.hasReachedEndgame()) {
+					handleEndgameBlock(repo, pieceMessage);
+				} else {
+					repo.writeBlock(piece.getIndex(), pieceMessage.getBlock(),
+							pieceMessage.getBegin());
+				}
+			} catch (IllegalStateException e){
+				repo.removeCurrentRequestedPiece(this);
+				askForNewPiece(repo);
+				return;
+			}
 			
 			if(piece.isComplete()) {
 				onPieceComplete(repo, piece);
@@ -457,26 +461,12 @@ public class Peer implements MessageListener {
 	
 	private void handleEndgameBlock(PieceRepository repo, PieceMessage pieceMessage) throws IllegalStateException, IOException {
 		Piece piece = repo.get(pieceMessage.getPieceIndex());
-		if(repo.checkPieceHasBlock(piece.getIndex(), pieceMessage.getBegin())) {
+		if(piece.hasBlock(pieceMessage.getBegin())) {
 			_logger.debug("Piece {} already has block {}", piece.getIndex(),
 					pieceMessage.getBegin());
 		} else {
 			repo.writeBlock(piece.getIndex(), pieceMessage.getBlock(),
 					pieceMessage.getBegin());
-		
-			// FIXME
-			/*// Cancel the piece form the rest of the peers.
-			Thread th = new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					cancelPiece(piece.getIndex(), pieceMessage.getBegin(),
-							pieceMessage.getBlock().duplicate());	
-				}
-			});
-			th.setDaemon(true);
-			th.start();
-			*/
 		}
 	}
 	

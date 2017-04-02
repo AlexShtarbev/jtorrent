@@ -190,7 +190,8 @@ public class PieceRepository {
 				_fileStore.write(piece.getData(), piece.getBegin());
 				_inFlightPieces.set(pieceIndex, false);
 				
-				if(!check(piece.getIndex())) {					
+				if(!check(piece.getIndex())) {
+					piece.clear();
 					throw new IllegalStateException("received piece #" + pieceIndex + " is not valid");
 				} else {				
 					markPieceComplete(pieceIndex);

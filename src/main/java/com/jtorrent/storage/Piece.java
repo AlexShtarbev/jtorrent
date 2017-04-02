@@ -117,7 +117,7 @@ public class Piece implements Comparable<Piece>{
 	}
 	
 	public synchronized boolean hasBlock(int blockBegin) {
-		return _blockSet.contains(blockBegin);
+		return _data != null && _blockSet.contains(blockBegin);
 	}
 
 	public synchronized void addBlock(ByteBuffer block, int blockBegin) {
@@ -139,10 +139,11 @@ public class Piece implements Comparable<Piece>{
 			_blockSet = new HashSet<>();
 		}
 		
-		if(hasBlock(blockBegin)) {
+		if(_blockSet.contains(blockBegin)) {
 			return;
+		} else {
+			_blockSet.add(blockBegin);
 		}
-		_blockSet.add(blockBegin);
 		// Mark he amount of bytes that need to be written to complete the
 		// piece.
 		block.rewind();
@@ -151,6 +152,10 @@ public class Piece implements Comparable<Piece>{
 		_data.position(blockBegin);
 		_data.put(block);
 		_data.rewind();
+	}
+	
+	public synchronized void clear() {
+		_data = null;
 	}
 
 	/**
