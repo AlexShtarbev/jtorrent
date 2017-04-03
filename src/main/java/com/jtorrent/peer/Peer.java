@@ -46,7 +46,6 @@ public class Peer implements MessageListener {
 
 	private TorrentSession _torrentSession;
 	private MessageChannel _messageChannel;
-	private Object _messageLock;
 	
 	// Peer state.
 	private boolean _amChoking;
@@ -69,7 +68,6 @@ public class Peer implements MessageListener {
 		setAddress(new InetSocketAddress(host, port));
 		setPeerID(peerID);
 		_host = _address.getAddress() + ":" + _address.getPort();
-		_messageLock = new Object();
 		
 		_amChoking = true;
 		_peerChoking = true;
