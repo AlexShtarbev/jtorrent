@@ -85,6 +85,11 @@ public class TorrentSession {
 	protected void start() {	
 		_torrentStatus = Status.CHECKING;
 		checkTorrentCompletion();
+		// Detect stop while the torrent is being checked.
+		if(isStopped()) {
+			return;	
+		}
+		
 		// Firstly, set the status of the torrent.
 		if(!_pieceRepository.isRepositoryCompleted()) {			
 			_torrentStatus = Status.DOWNLOADING;
@@ -126,20 +131,7 @@ public class TorrentSession {
 			}
 		});
 		th.setDaemon(true);
-		th.start();
-		// FIXME
-		/*try {
-			_announceService.stop(true);
-			_peerManager.disconnectAllConcurrently();
-			_peerManager.stop();
-			if(isRemoved) {
-				_peerManager.cleanup();
-			}
-			_connectionService.unregister(TorrentSession.this);		
-		} catch (InterruptedException e) {
-			// Ignore.
-		}*/
-		
+		th.start();		
 	}
 
 	/**
@@ -260,10 +252,16 @@ public class TorrentSession {
 		// the results from tasks are inspected and then the algorithm moves on
 		// with scheduling more checker tasks.
 		for (Piece p : _pieceRepository.toPieceArray()) {
+			if(isStopped()) {
+				results.clear();
+				exec.shutdownNow();
+				return;
+			}
 			results.add(exec.submit(new PieceChecker(p)));
 
-			if (results.size() != Runtime.getRuntime().availableProcessors())
+			if (results.size() != Runtime.getRuntime().availableProcessors()) {
 				continue;
+			}
 
 			try {
 				percent = handleFinishedChekers(results, percent);

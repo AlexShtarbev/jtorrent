@@ -67,5 +67,7 @@ public interface FileStore {
 
 	public List<String> getFileNames();
 	
+	public String getParentName();
+	
 	public long size();
 }

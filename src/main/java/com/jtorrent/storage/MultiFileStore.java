@@ -59,6 +59,22 @@ public class MultiFileStore implements FileStore {
 			_size += file.getLength();
 		}
 	}
+	
+	public String getParentName() {
+		if(_fileNames == null || _fileNames.isEmpty()) {
+			return null;
+		}
+		
+		String parent = null;
+		for(FileStore _store : _fileStores) {
+			String currentParent = _store.getParentName();
+			if(parent == null || currentParent.length() < parent.length()) {
+				parent = currentParent;
+			}
+		}
+		
+		return parent;
+	}
 
 	public long getSize() {
 		return _size;

@@ -7,7 +7,9 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +18,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -156,7 +157,10 @@ public class ConnectionService {
 		_connectionService = null;
 		_listeningService = null;
 		
-		for(TorrentSession ts : _registeredTorrents.values()) {
+		// The list needs to be copied to avoid concurrent modification exceptions 
+		// as its contents will be deleted.
+		Collection<TorrentSession> registered = new LinkedList<TorrentSession>(_registeredTorrents.values());
+		for(TorrentSession ts : registered) {
 			unregister(ts);
 		}
 	}

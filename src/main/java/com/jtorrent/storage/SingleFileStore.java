@@ -142,4 +142,9 @@ public class SingleFileStore implements FileStore {
 	public List<String> getFileNames() {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public String getParentName() {
+		return _file.getParentFile().getAbsolutePath();
+	}
 }

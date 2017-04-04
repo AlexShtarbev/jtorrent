@@ -55,8 +55,10 @@ public class AnnounceService {
 	public void stop(boolean shouldHardStop) throws InterruptedException {
 		_stop = true;
 		_hardStop = shouldHardStop;
-		if (!_announceService.isShutdown() && !_announceService.isTerminated()
-				&& ((ThreadPoolExecutor) _announceService).getActiveCount() != 0) {
+		if (_announceService != null &&
+				!_announceService.isShutdown() &&
+				!_announceService.isTerminated() &&
+				((ThreadPoolExecutor) _announceService).getActiveCount() != 0) {
 			_announceService.shutdownNow();
 			_announceService.awaitTermination(5, TimeUnit.SECONDS);
 			_announceService = null;
