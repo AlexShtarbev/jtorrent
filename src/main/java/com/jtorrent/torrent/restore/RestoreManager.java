@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jtorrent.messaging.announce.ConnectionService;
 import com.jtorrent.peer.Peer;
 import com.jtorrent.torrent.TorrentSession;
+import com.jtorrent.torrent.TorrentSession.Status;
 
 public class RestoreManager {
 	
@@ -74,6 +75,7 @@ public class RestoreManager {
 		TorrentSessionRestorePoint restorePoint = new TorrentSessionRestorePoint();
 		restorePoint.setTorrentFile(session.getTorrentFileName());
 		restorePoint.setDestinationFolder(session.getDestionationFolder());
+		restorePoint.setStopped(session.isStopped());
 		
 		return restorePoint;
 	}
@@ -87,13 +89,27 @@ public class RestoreManager {
 		if (isInRestorePoint(session)) {
 			return;
 		}
-		// Create the new restore point for the torrent session
+		// Create the new restore point for the torrent session.
 		TorrentSessionRestorePoint restorePoint = provideRestorePoint(session);
 		
 		// Add it to the current list of restore points.
 		TorrentClientRestorePoint lastRestore = getLastRestorePoint();
 		List<TorrentSessionRestorePoint> restorePoints = lastRestore.getTorrentSessions();
 		restorePoints.add(restorePoint);
+		
+		// Overwrite the existing restore point with the new one.
+		updateResotreFile(lastRestore);
+	}
+	
+	public void setTorrentSessionStopped(TorrentSession session, boolean stopped) throws IOException {
+		TorrentClientRestorePoint lastRestore = getLastRestorePoint();
+		List<TorrentSessionRestorePoint> restorePoints = lastRestore.getTorrentSessions();
+		for(TorrentSessionRestorePoint restore : restorePoints) {
+			if(restore.getTorrentFile().equals(session.getTorrentFileName())) {
+				restore.setStopped(stopped);
+				break;
+			}
+		}
 		
 		// Overwrite the existing restore point with the new one.
 		updateResotreFile(lastRestore);
@@ -132,11 +148,13 @@ public class RestoreManager {
 		List<TorrentSession> sessions = new ArrayList<>();
 		
 		for(TorrentSessionRestorePoint restorePoint : clientRestore.getTorrentSessions()) {
+			Status status = restorePoint.getStopped() ? Status.STOPPED : TorrentSession.INITIAL_STATUS;
 			TorrentSession session = new TorrentSession(
 					restorePoint.getTorrentFile(),
 					restorePoint.getDestinationFolder(),
 					clientPeer,
-					connService);
+					connService,
+					status);
 			
 			sessions.add(session);
 		}
@@ -150,7 +168,7 @@ public class RestoreManager {
 		try {
 			String restFile = "torrents.json";
 			RestoreManager rm = new RestoreManager(restFile);
-			TorrentSession ts1 = new TorrentSession("D:/Movie/orig.torrent", "D:/Movie/dir", null, null);
+			TorrentSession ts1 = new TorrentSession("D:/Movie/orig.torrent", "D:/Movie/dir", null, null, Status.STOPPED);
 			TorrentSession ts2 = new TorrentSession("D:/Movie/vamp.torrent", "D:/Movie/dir", null, null);
 			
 			rm.appendTorrentSession(ts1);			
@@ -158,7 +176,19 @@ public class RestoreManager {
 			TorrentClientRestorePoint rp = rm.getLastRestorePoint();
 			System.out.print(rp.toString());			
 			
-			rm.removeTorrentSessionRestorePoint(ts1);
+			System.out.println("---------------------");
+			ts1.setStatus(Status.DOWNLOADING);
+			rm.setTorrentSessionStopped(ts1, ts1.isStopped());
+			rp = rm.getLastRestorePoint();
+			System.out.print(rp.toString());
+			
+			System.out.println("---------------------");
+			ts2.setStatus(Status.STOPPED);
+			rm.setTorrentSessionStopped(ts2, ts2.isStopped());
+			rp = rm.getLastRestorePoint();
+			System.out.print(rp.toString());
+			
+			/*rm.removeTorrentSessionRestorePoint(ts1);
 			rp = rm.getLastRestorePoint();
 			System.out.print(rp.toString());
 			
@@ -166,7 +196,7 @@ public class RestoreManager {
 			rm.appendTorrentSession(ts2);
 			rm.appendTorrentSession(ts2);
 			rp = rm.getLastRestorePoint();
-			System.out.print(rp.toString());
+			System.out.print(rp.toString());*/
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
