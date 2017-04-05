@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jtorrent.messaging.announce.ConnectionService;
 import com.jtorrent.peer.Peer;
+import com.jtorrent.torrent.TorrentSession.Status;
 import com.jtorrent.torrent.restore.RestoreManager;
 
 /**
@@ -34,13 +35,13 @@ public class TorrentClient implements TorrentSessionEventListener {
 	
 	private static final String RESTORE_FILE = "torrents.json";
 	
-	public static final int MAX_DOWNLOADING_TORRENTS = 5;
+	public static final int MAX_DOWNLOADING_TORRENTS = 1;
 	public static final int MAX_TORRENTS = 30;
 	
 	private ConnectionService _connectionService;
 	private ExecutorService _sessionExecutor;
 	
-	private List<TorrentSessionTask> _torrentQueue;
+	private List<SessionTask> _torrentQueue;
 	private List<TorrentSession> _activeSessions;
 	private int _downloading;
 	private Peer _clientPeer;
@@ -61,7 +62,7 @@ public class TorrentClient implements TorrentSessionEventListener {
 			_logger.warn("Exception occured while setting client id : {}", e.getMessage());
 		}
 				
-		_torrentQueue = new LinkedList<TorrentSessionTask>();
+		_torrentQueue = new LinkedList<SessionTask>();
 		_activeSessions = new LinkedList<TorrentSession>();
 		
 		try {
@@ -109,28 +110,23 @@ public class TorrentClient implements TorrentSessionEventListener {
 
 	public synchronized TorrentSession startNewSession(String fileName, String destination)
 			throws Exception {
-		TorrentSessionTask task = new TorrentSessionTask(fileName, destination);
+		NewSessionTask task = new NewSessionTask(fileName, destination);
 		startTask(task);
 		return task.getTorrentSession();
 	}
 	
 	public synchronized void startNewSession(TorrentSession session)
 			throws Exception {
-		TorrentSessionTask task = new TorrentSessionTask(session);
+		NewSessionTask task = new NewSessionTask(session);
 		startTask(task);
 	}
 	
-	private synchronized void startTask(TorrentSessionTask task) throws Exception {
+	private synchronized void startTask(SessionTask task) throws Exception {
 		if(_activeSessions.size() + _torrentQueue.size() == MAX_TORRENTS) {
 			throw new QueueingException("Reach max number of torrents.");
 		}
 		_restoreManager.appendTorrentSession(task.getTorrentSession());
-		if(_downloading == MAX_DOWNLOADING_TORRENTS) {
-			_torrentQueue.add(task);
-		} else {
-			_downloading++;
-			_sessionExecutor.execute(task);
-		}
+		_sessionExecutor.execute(task);
 	}
 	
 	private synchronized void addNewActiveSession(TorrentSession session) {
@@ -138,39 +134,52 @@ public class TorrentClient implements TorrentSessionEventListener {
 	}
 	
 	@Override
-	public synchronized void onDownloadComplete() {
+	public synchronized void onSessionClosed() {
 		_downloading--;
 		if(!_torrentQueue.isEmpty()) {
-			TorrentSessionTask waiting = ((LinkedList<TorrentSessionTask>)_torrentQueue).poll();
+			SessionTask waiting = ((LinkedList<SessionTask>)_torrentQueue).poll();
 			_sessionExecutor.execute(waiting);
 		}
 	}
 
-	public synchronized void resumeTorrentSession(TorrentSession session) {
-		if(session.isQueuing()) {
+	public synchronized void resumeTorrentSession(TorrentSession session) throws Exception {
+		if(session.isQueuing() || session.isDownloading() || session.isSeeding()) {
 			return;
 		}
 		
-		_sessionExecutor.execute(new ResumeTorrentTask(session));
+		try {
+			_restoreManager.setTorrentSessionStopped(session, false);
+		} catch (IOException e) {
+			_logger.warn("Unable to update torrent session in Restore Manager: {}", e.getMessage());
+		}
+		
+		startTask(new ResumeSessionTask(session));
 	}
 	
-	public synchronized void stopTorrentSession(TorrentSession session) {
-		if(session.isQueuing()) {
+	public synchronized void stopTorrentSession(TorrentSession session) throws Exception {
+		if(session.isQueuing() || session.isStopped()) {
 			return;
 		}
 		
-		session.stop(false);
+		try {
+			_restoreManager.setTorrentSessionStopped(session, true);
+		} catch (IOException e) {
+			_logger.warn("Unable to update torrent session in Restore Manager: {}", e.getMessage());
+		}
+		
+		startTask(new StopSessionTask(session, false));
 	}
 	
-	public synchronized void removeTorrentSession(TorrentSession session) {
+	public synchronized void removeTorrentSession(TorrentSession session) throws Exception {
 		try {
 			_restoreManager.removeTorrentSessionRestorePoint(session);
 		} catch (Exception e) {
 			_logger.warn("Could not remove resotre point for {}: e", session.getTorrentFileName(),
 					e.getMessage());
 		}
+		
 		if(session.isQueuing()) {
-			for(TorrentSessionTask task : _torrentQueue) {
+			for(SessionTask task : _torrentQueue) {
 				if(task.getTorrentSession().equals(session)) {
 					_torrentQueue.remove(task);
 					return;
@@ -179,7 +188,7 @@ public class TorrentClient implements TorrentSessionEventListener {
 		}
 		
 		_activeSessions.remove(session);
-		session.stop(true);
+		startTask(new StopSessionTask(session, true));
 	}
 	
 	public void shutdown() {
@@ -199,20 +208,53 @@ public class TorrentClient implements TorrentSessionEventListener {
 		}
 	}
 	
-	private class TorrentSessionTask implements Runnable {
-		private final TorrentSession _torrentSession;
-		
-		public TorrentSessionTask(TorrentSession torrentSession) {
+	private class SessionTask implements Runnable {
+		protected final TorrentSession _torrentSession;
+
+		public SessionTask(TorrentSession torrentSession) {
 			_torrentSession = torrentSession;
 		}
 		
-		public TorrentSessionTask(String fileName, String destination) 
+		public SessionTask(String fileName, String destination) 
 				throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, URISyntaxException {
 			_torrentSession = new TorrentSession(fileName, destination, _clientPeer, _connectionService);
 		}
 		
+		@Override
+		public void run() {
+			// Empty
+			// Any child of this task must override this method.
+		}
+		
 		public TorrentSession getTorrentSession() {
 			return _torrentSession;
+		}
+		
+		/**
+		 * Attempts to start the current torrent session. The torrent session
+		 * will not be started if there is no free slot for adding a torrent.
+		 * In that case the torrent session will be queued.
+		 */
+		protected void tryTorrentSession() {
+			if(!_torrentSession.getPieceRepository().isRepositoryCompleted() 
+					&& _downloading == MAX_DOWNLOADING_TORRENTS) {
+				_torrentSession.setStatus(Status.QUEUING);
+				_torrentQueue.add(new ResumeSessionTask(_torrentSession));
+			} else {
+				_downloading++;
+				_torrentSession.start();
+			}
+		}
+	}
+	
+	private class NewSessionTask extends SessionTask {		
+		public NewSessionTask(TorrentSession torrentSession) {
+			super(torrentSession);
+		}
+		
+		public NewSessionTask(String fileName, String destination) 
+				throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, URISyntaxException {
+			super(fileName, destination);
 		}
 
 		@Override
@@ -220,21 +262,52 @@ public class TorrentClient implements TorrentSessionEventListener {
 			_connectionService.register(_torrentSession);
 			addNewActiveSession(_torrentSession);
 			_torrentSession.register(TorrentClient.this);
-			_torrentSession.start(); 
+			// When a torrent is being restored its initial status can be STOPPED.
+			// Therefore after the torrent is checked it status is set to STOPPED
+			// and no further work is to be done.
+			boolean isStopped = _torrentSession.isStopped();
+			// Even if a torrent is stopped it needs to be checked first.
+			_torrentSession.check();
+			// If it has not been stopped before the client was terminated, then 
+			// an attempt is made to be started. It is called an attempt, because
+			// if the man number of downloading torrents has been reached, the
+			// current session will be queued.
+			if(!isStopped) {
+				// If the torrent is to be downloaded, we need to check if there is an
+				// open slot for downloading it.
+				tryTorrentSession();
+			} else {
+				_torrentSession.setStatus(Status.STOPPED);
+			}
 			_logger.debug("Exited TorrentSessionTask for torrent {}", _torrentSession.getTorrentFileName());
 		}
 	}
 	
-	private class ResumeTorrentTask implements Runnable {
-		private final TorrentSession _torrentSession;
-		
-		public ResumeTorrentTask(TorrentSession torrentSession) {
-			_torrentSession = torrentSession;
+	private class ResumeSessionTask extends SessionTask {		
+		public ResumeSessionTask(TorrentSession torrentSession) {
+			super(torrentSession);
 		}
 		
 		@Override
 		public void run() {
-			_torrentSession.start();
+			_torrentSession.check();
+			tryTorrentSession();
+		}
+	}
+	
+	private class StopSessionTask extends SessionTask {		
+		private final boolean _isRemoved;
+		
+		public StopSessionTask(TorrentSession torrentSession, boolean isRemoved) {
+			super(torrentSession);
+			_isRemoved = isRemoved;
+		}
+		
+		@Override
+		public void run() {
+			_downloading--;		
+			_torrentSession.stop(_isRemoved);
+			onSessionClosed();			
 		}
 	}
 		
