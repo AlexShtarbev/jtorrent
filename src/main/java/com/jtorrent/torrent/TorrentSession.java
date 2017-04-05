@@ -39,6 +39,7 @@ public class TorrentSession {
 	}
 	
 	public static final String BYTE_ENCODING = "ISO-8859-1";
+	public static final Status INITIAL_STATUS = Status.QUEUING;
 
 	private static final Logger _logger = LoggerFactory.getLogger(TorrentSession.class);
 	
@@ -57,6 +58,13 @@ public class TorrentSession {
 	private List<TorrentSessionEventListener> _listeners;
 	
 	private long _checkedPieces;
+	
+	public TorrentSession(String torrentFileName, String destination, Peer clientPeer,
+			ConnectionService connectionService, Status status) 
+			throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, IOException, URISyntaxException {
+		this(torrentFileName, destination, clientPeer, connectionService);
+		_torrentStatus = status;
+	}
 
 	public TorrentSession(String torrentFileName, String destination, Peer clientPeer,
 			ConnectionService connectionService)
@@ -66,7 +74,7 @@ public class TorrentSession {
 		
 		_metaInfo = new MetaInfo(new File(torrentFileName));
 		_store = new MultiFileStore(_metaInfo.getInfoDictionary().getFiles(), destination);
-		_torrentStatus = Status.QUEUING;
+		_torrentStatus = INITIAL_STATUS;
 		
 		// Session information
 		_sessionInfo = new SessionInfo(clientPeer);
@@ -81,15 +89,13 @@ public class TorrentSession {
 		_pieceRepository = new PieceRepository(this);
 		_listeners = new LinkedList<TorrentSessionEventListener>();
 	}
-
-	protected void start() {	
+	
+	protected void check() {
 		_torrentStatus = Status.CHECKING;
 		checkTorrentCompletion();
-		// Detect stop while the torrent is being checked.
-		if(isStopped()) {
-			return;	
-		}
-		
+	}
+
+	protected void start() {		
 		// Firstly, set the status of the torrent.
 		if(!_pieceRepository.isRepositoryCompleted()) {			
 			_torrentStatus = Status.DOWNLOADING;
@@ -193,6 +199,10 @@ public class TorrentSession {
 		return _pieceRepository;
 	}
 	
+	public void setStatus(Status status) {
+		_torrentStatus = status;
+	}
+	
 	public Status getStatus() {
 		return _torrentStatus;
 	}
@@ -232,7 +242,7 @@ public class TorrentSession {
 	
 	public void notifyDownloadCompleted() {
 		for(TorrentSessionEventListener listener : _listeners) {
-			listener.onDownloadComplete();
+			listener.onSessionClosed();
 		}
 	}
 	
