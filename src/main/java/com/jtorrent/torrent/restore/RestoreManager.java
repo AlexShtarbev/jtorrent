@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jtorrent.messaging.announce.ConnectionService;
 import com.jtorrent.peer.Peer;
+import com.jtorrent.torrent.TorrentClient;
 import com.jtorrent.torrent.TorrentSession;
 import com.jtorrent.torrent.TorrentSession.Status;
 
@@ -59,7 +60,6 @@ public class RestoreManager {
 	}
 	
 	public TorrentClientRestorePoint getLastRestorePoint() throws IOException {
-		
 		// Read the JSON file data.
 		byte[] jsonData = Files.readAllBytes(Paths.get(_restoreFile));
 		
@@ -126,19 +126,23 @@ public class RestoreManager {
 		return false;
 	}
 	
-	public void removeTorrentSessionRestorePoint(TorrentSession session) throws JsonGenerationException, JsonMappingException, IOException {		
+	public void removeTorrentSessionRestorePoint(TorrentSession session) throws JsonGenerationException, JsonMappingException, IOException {	
 		TorrentClientRestorePoint lastRestore = getLastRestorePoint();
 		List<TorrentSessionRestorePoint> restorePoints = lastRestore.getTorrentSessions();
 		
+		TorrentSessionRestorePoint point = null;
 		// Search for the restore point of the torrent session and remove it.
 		for(int i = 0; i < restorePoints.size(); i++) {
 			if(restorePoints.get(i).getTorrentFile().equals(session.getTorrentFileName())) {
-				restorePoints.remove(i);
+				point = restorePoints.get(i);
 				break;
 			}
 		}
 		
-		updateResotreFile(lastRestore);
+		if(point != null) {
+			restorePoints.remove(point);
+			updateResotreFile(lastRestore);
+		}
 	}
 	
 	public List<TorrentSession> restroreTorrentSessions(ConnectionService connService, Peer clientPeer)
@@ -147,16 +151,29 @@ public class RestoreManager {
 		TorrentClientRestorePoint clientRestore = getLastRestorePoint();
 		List<TorrentSession> sessions = new ArrayList<>();
 		
-		for(TorrentSessionRestorePoint restorePoint : clientRestore.getTorrentSessions()) {
-			Status status = restorePoint.getStopped() ? Status.STOPPED : TorrentSession.INITIAL_STATUS;
-			TorrentSession session = new TorrentSession(
-					restorePoint.getTorrentFile(),
-					restorePoint.getDestinationFolder(),
-					clientPeer,
-					connService,
-					status);
-			
-			sessions.add(session);
+		List<TorrentSessionRestorePoint> lastSession = clientRestore.getTorrentSessions();
+		List<TorrentSessionRestorePoint> valid = new ArrayList<TorrentSessionRestorePoint>();
+		valid.addAll(lastSession);
+		for(int i = 0; i < lastSession.size(); i++) {
+			Status status = lastSession.get(i).getStopped() ? Status.STOPPED : TorrentSession.INITIAL_STATUS;
+			// Skip any problematic torrents and remove them from the restore file.
+			try {
+				TorrentSession session = new TorrentSession(
+						lastSession.get(i).getTorrentFile(),
+						lastSession.get(i).getDestinationFolder(),
+						clientPeer,
+						connService,
+						status);
+				sessions.add(session);
+			} catch (Exception e) {
+				valid.remove(i);
+				continue;
+			}			
+		}
+		
+		if(valid.size() != lastSession.size()) {
+			clientRestore.setTorrentSessions(valid);
+			updateResotreFile(clientRestore);
 		}
 		
 		return sessions;
@@ -176,27 +193,9 @@ public class RestoreManager {
 			TorrentClientRestorePoint rp = rm.getLastRestorePoint();
 			System.out.print(rp.toString());			
 			
-			System.out.println("---------------------");
-			ts1.setStatus(Status.DOWNLOADING);
-			rm.setTorrentSessionStopped(ts1, ts1.isStopped());
+			rm.removeTorrentSessionRestorePoint(ts1);
 			rp = rm.getLastRestorePoint();
 			System.out.print(rp.toString());
-			
-			System.out.println("---------------------");
-			ts2.setStatus(Status.STOPPED);
-			rm.setTorrentSessionStopped(ts2, ts2.isStopped());
-			rp = rm.getLastRestorePoint();
-			System.out.print(rp.toString());
-			
-			/*rm.removeTorrentSessionRestorePoint(ts1);
-			rp = rm.getLastRestorePoint();
-			System.out.print(rp.toString());
-			
-			rm.appendTorrentSession(ts2);
-			rm.appendTorrentSession(ts2);
-			rm.appendTorrentSession(ts2);
-			rp = rm.getLastRestorePoint();
-			System.out.print(rp.toString());*/
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -102,7 +102,7 @@ public class TorrentClient implements TorrentSessionEventListener {
 		}
 		for(TorrentSession session : _activeSessions) {
 			if(!session.isStopped() && !session.isQueuing()) {
-				session.stop(false);
+				session.stop(true);
 			}
 		}
 		_sessionExecutor.shutdownNow();
@@ -122,10 +122,16 @@ public class TorrentClient implements TorrentSessionEventListener {
 	}
 	
 	private synchronized void startTask(SessionTask task) throws Exception {
+		startTask(task, true);
+	}
+	
+	private synchronized void startTask(SessionTask task, boolean shouldAppend) throws Exception {
 		if(_activeSessions.size() + _torrentQueue.size() == MAX_TORRENTS) {
 			throw new QueueingException("Reach max number of torrents.");
 		}
-		_restoreManager.appendTorrentSession(task.getTorrentSession());
+		if(shouldAppend) {
+			_restoreManager.appendTorrentSession(task.getTorrentSession());
+		}
 		_sessionExecutor.execute(task);
 	}
 	
@@ -167,7 +173,7 @@ public class TorrentClient implements TorrentSessionEventListener {
 			_logger.warn("Unable to update torrent session in Restore Manager: {}", e.getMessage());
 		}
 		
-		startTask(new StopSessionTask(session, false));
+		startTask(new StopSessionTask(session, false), false);
 	}
 	
 	public synchronized void removeTorrentSession(TorrentSession session) throws Exception {
@@ -188,7 +194,7 @@ public class TorrentClient implements TorrentSessionEventListener {
 		}
 		
 		_activeSessions.remove(session);
-		startTask(new StopSessionTask(session, true));
+		startTask(new StopSessionTask(session, true), false);
 	}
 	
 	public void shutdown() {
@@ -235,7 +241,7 @@ public class TorrentClient implements TorrentSessionEventListener {
 		 * will not be started if there is no free slot for adding a torrent.
 		 * In that case the torrent session will be queued.
 		 */
-		protected void tryTorrentSession() {
+		protected void tryTorrentSession() {			
 			if(!_torrentSession.getPieceRepository().isRepositoryCompleted() 
 					&& _downloading == MAX_DOWNLOADING_TORRENTS) {
 				_torrentSession.setStatus(Status.QUEUING);

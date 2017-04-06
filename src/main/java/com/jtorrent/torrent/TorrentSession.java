@@ -124,9 +124,6 @@ public class TorrentSession {
 					_announceService.stop(true);
 					_peerManager.disconnectAllConcurrently();
 					_peerManager.stop();
-					if(isRemoved) {
-						_peerManager.cleanup();
-					}
 				} catch (InterruptedException e) {
 					// Ignore.
 				}

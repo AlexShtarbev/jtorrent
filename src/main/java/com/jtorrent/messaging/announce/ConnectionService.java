@@ -159,10 +159,7 @@ public class ConnectionService {
 		
 		// The list needs to be copied to avoid concurrent modification exceptions 
 		// as its contents will be deleted.
-		Collection<TorrentSession> registered = new LinkedList<TorrentSession>(_registeredTorrents.values());
-		for(TorrentSession ts : registered) {
-			unregister(ts);
-		}
+		_registeredTorrents = new HashMap<String, TorrentSession>();
 	}
 	
 	public void cancel() throws IOException {
@@ -204,6 +201,7 @@ public class ConnectionService {
 					stop();
 				}
 			}
+			_logger.debug("Listen task closed");
 		}
 
 		private void connect(SocketChannel channel) {
@@ -273,7 +271,7 @@ public class ConnectionService {
 				channel.configureBlocking(false);
 				return new HandshakeResponse(handshake, channel, _peer);
 
-			} catch (IOException | InterruptedException | HandshakeException e) {
+			} catch (Exception e) {
 				_logger.debug("Could not connect to {}. Reason: ", _peer, e.getMessage());
 				if (channel != null && channel.isConnected()) {
 					IOUtils.closeQuietly(channel);

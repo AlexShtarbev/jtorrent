@@ -67,7 +67,7 @@ public class MessageChannel {
 
 	public void close() {
 		_closed = true;		
-		_messageService.shutdown();
+		_messageService.shutdownNow();
 		if(_socketChannel.isConnected()) {
 			IOUtils.closeQuietly(_socketChannel);
 		}
@@ -129,7 +129,7 @@ public class MessageChannel {
 						ByteBuffer dup = msg.duplicate();
 						dup.rewind();
 						message = Messages.parse(_torrentSession, dup).getMessageType().toString();
-						_logger.debug("Peer {} is trying to send {} bytes {} message", _peer.getHostAddress(), msg.capacity(), message);
+						_logger.trace("Peer {} is trying to send {} bytes {} message", _peer.getHostAddress(), msg.capacity(), message);
 					} catch (MessageExchangeException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -139,12 +139,12 @@ public class MessageChannel {
 					while(!_closed && msg.hasRemaining()) {
 						int sent = _socketChannel.write(msg);
 						if(sent < 0) {
-							_logger.debug("DAMN IT!!! could not send message {}", message);
+							_logger.trace("DAMN IT!!! could not send message {}", message);
 							EOFException e = new EOFException("unexpected end of stream while sending " + message);
 							notifyExceptionListeners(e);
 							return;
 						} else {
-							_logger.debug("Sent {} bytes {} to peer {}", sent, message, _peer.getHostAddress());
+							_logger.trace("Sent {} bytes {} to peer {}", sent, message, _peer.getHostAddress());
 						}
 						
 					}
@@ -152,8 +152,9 @@ public class MessageChannel {
 					notifyExceptionListeners(e);
 				}
 			}
-		}
-		
+			
+			_logger.debug("Closed send task");
+		}		
 	}
 	
 	private class MessageReceiveTask implements Runnable {
@@ -172,7 +173,7 @@ public class MessageChannel {
 				_socketChannel.register(_selector, SelectionKey.OP_READ);
 				
 				while(!_closed) {
-					_logger.info("Trying to read from peer {}...", _peer.getHostAddress());
+					_logger.trace("Trying to read from peer {}...", _peer.getHostAddress());
 					message.rewind();
 					// Read the length of the message first.
 					message.limit(Message.LENGTH_FIELD_SIZE);
@@ -182,7 +183,7 @@ public class MessageChannel {
 										
 					// Get ready to accept the entire message.
 					int length = message.getInt(0);
-					_logger.debug("Trying to read message with <len={}> from peer {}", length, _peer.getHostAddress());
+					_logger.trace("Trying to read message with <len={}> from peer {}", length, _peer.getHostAddress());
 
 					message.limit(Message.LENGTH_FIELD_SIZE + length);
 					while(!_closed && message.hasRemaining()) {

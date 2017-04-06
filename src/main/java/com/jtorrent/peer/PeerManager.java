@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -74,6 +75,8 @@ public class PeerManager implements PeerStateListener {
 	private final Thread _chokerThread;
 	
 	private volatile boolean _stop;
+	
+	private final List<Future<HandshakeResponse>> _connectionFutures;
 
 	public PeerManager(ConnectionService connService, TorrentSession session) {
 		_addressToPeerMap = new HashMap<String, Peer>();
@@ -86,10 +89,13 @@ public class PeerManager implements PeerStateListener {
 		_registerService = Executors.newCachedThreadPool();
 		
 		_chokerThread = new Thread(new ChokerTask());
+		
+		_connectionFutures = new ArrayList<Future<HandshakeResponse>>();
 	}
 
 	public void cleanup() {
-		_registerService.shutdown();
+		_registerService.shutdownNow();
+		_logger.debug("PeerManager:ReisgerService shut down");
 	}
 
 	public synchronized void set(List<Peer> peerList) {
@@ -214,17 +220,16 @@ public class PeerManager implements PeerStateListener {
 	 */
 	public void registerConnectionAll(List<Peer> peers) {
 		set(peers);
-		ArrayList<Future<HandshakeResponse>> results = new ArrayList<Future<HandshakeResponse>>();
 		for (Peer peer : _addressToPeerMap.values()) {
 			Future<HandshakeResponse> future = _connectionService.connect(_torrentSession, peer);
 			if(future == null) {
 				continue;
 			}
 			
-			results.add(future);
+			_connectionFutures.add(future);
 		}
 		
-		for (Future<HandshakeResponse> handshakeResponseFuture : results) {
+		for (Future<HandshakeResponse> handshakeResponseFuture : _connectionFutures) {
 			_registerService.execute(new RegisterTask(handshakeResponseFuture));
 		}
 	}
@@ -288,6 +293,8 @@ public class PeerManager implements PeerStateListener {
 				_logger.debug("Registriation interrupted: {}", e.getMessage());
 			} catch (ExecutionException e) {
 				_logger.debug("Unable to retrieve result from future {}", e.getMessage());
+			} catch (CancellationException e) {
+				// Do nothing.
 			}
 		}
 	}
@@ -299,9 +306,15 @@ public class PeerManager implements PeerStateListener {
 	
 	public void stop() throws InterruptedException {
 		_stop = true;
-		_chokerThread.join(5000);
+		_chokerThread.join();
 		_addressToPeerMap = new HashMap<String, Peer>();
-		_idToPeerMap = new HashMap<String, Peer>(); 
+		_idToPeerMap = new HashMap<String, Peer>();
+
+		// Cancel all currently running connection attempts.
+		for(Future<HandshakeResponse> future : _connectionFutures) {
+			future.cancel(true);
+		}
+		_logger.debug("Peer manager stopped");
 	}
 	
 	public synchronized void disconnectAllConcurrently() throws InterruptedException {
@@ -319,18 +332,14 @@ public class PeerManager implements PeerStateListener {
 		executor.invokeAll(callables);
 		
 		try {
-		    executor.shutdown();
-		    executor.awaitTermination(5, TimeUnit.SECONDS);
-		}
-		catch (InterruptedException e) {
-		    _logger.warn("Shutdown tasks interrupted.");
+		    executor.shutdownNow();
 		}
 		finally {
 		    if (!executor.isTerminated()) {
 		        _logger.debug("Cancelling non-finished tasks.");
 		    }
 		    executor.shutdownNow();
-		    _logger.debug("Shutdown finished successfully.");
+		    _logger.debug("Disconnecting finished successfully.");
 		}
 	}
 	
