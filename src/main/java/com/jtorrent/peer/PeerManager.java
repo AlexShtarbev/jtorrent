@@ -399,7 +399,14 @@ public class PeerManager implements PeerStateListener {
 			if(_stop) {
 				return;
 			}
-			TreeSet<Peer> connectedPeers = new TreeSet<>(provideRateComparator());
+			Comparator<Peer> rateComparator;
+			try {
+				rateComparator = provideRateComparator();
+			} catch(IllegalArgumentException e) {
+				_logger.trace("Could not find rate comparator this time");
+				return;
+			}
+			TreeSet<Peer> connectedPeers = new TreeSet<>(rateComparator);
 			connectedPeers.addAll(_connectedPeersMap.values());
 			if(connectedPeers.size() == 0) {
 				_logger.debug("No connected peers at this time.");
