@@ -302,7 +302,7 @@ public class Peer implements MessageListener {
 				onBitfield(repo, msg);
 				break;
 			case REQUEST:
-				onRequest(repo, msg);
+				//onRequest(repo, msg);
 				break;
 			case PIECE:
 				onPiece(repo, msg);

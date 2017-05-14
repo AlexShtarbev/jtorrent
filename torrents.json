@@ -1,1 +1,9 @@
-{"torrentSessions":[{"destinationFolder":"D:/Movie/dir","torrentFile":"D:/Movie/vamp.torrent"}]}
+{
+	"torrentSessions": [
+		{
+			"destinationFolder": "D:/Movie/dir",
+			"torrentFile": "D:/Movie/vamp.torrent",
+			"stopped": false
+		}
+	]
+}

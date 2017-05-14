@@ -261,7 +261,7 @@ public class PieceRepository {
 	 *            The index of the piece.
 	 */
 	public synchronized void markPieceComplete(int pieceIndex) {
-		_logger.debug("HURRRRAHHHH!!! Piece {} completed", pieceIndex);
+		_logger.debug("Piece {} completed", pieceIndex);
 		// Check of the piece has not already been completed.
 		// If so - do nothing.
 		if(_completedPieces.get(pieceIndex)) {
@@ -335,6 +335,8 @@ public class PieceRepository {
 		BitSet bitSet = _peerBitSetMap.get(peer.getHexPeerID());
 		if(bitSet != null) {
 			for(int i = bitSet.nextSetBit(0); i >= 0; i = bitSet.nextSetBit(i + 1)) {
+				if(i == -1) break;
+				
 				updatePieceFrequency(i, false);
 			}
 		}
@@ -377,7 +379,7 @@ public class PieceRepository {
 	
 	/**
 	 * Updates the frequency of the piece.
-	 * @param index The piece whose frequency is to be updates.
+	 * @param index The piece whose frequency is to be updated.
 	 * @param available Whether the piece is available or has been lost due to peer disconnecting. 
 	 */
 	private synchronized void updatePieceFrequency(int index, boolean available) {

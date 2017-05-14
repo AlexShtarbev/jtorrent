@@ -176,6 +176,10 @@ public class PeerManager implements PeerStateListener {
 			return;
 		}
 		
+		if(tryPeer.getPeerID() == null) {
+			return;
+		}
+		
 		// See if we hate the peer in the list of peers. If not - add it.
 		// When the client fails connect to a peer, the peer is removed
 		Peer peer = get(tryPeer);
@@ -204,7 +208,7 @@ public class PeerManager implements PeerStateListener {
 				_idToPeerMap.put(peer.getPeerID(), peer);
 				// Register the peer with the piece repository.
 				_torrentSession.getPieceRepository().register(peer);
-				_logger.debug("YAAAAAAAAAY - registered {}", peer);
+				_logger.debug("registered {}", peer);
 			} catch (IOException e) {
 				_logger.warn("Could not register new peer {}. Reason: {}", peer, e.getMessage());
 				_connectedPeersMap.remove(peer.getHexPeerID());
@@ -460,16 +464,6 @@ public class PeerManager implements PeerStateListener {
 		synchronized (_connectedLockObject) {
 			_connectedPeersMap.remove(peer.getHexPeerID());
 			_logger.debug("Peer {} disconnected, leaving {} connected peers", peer.getHostAddress(), _connectedPeersMap.values().size());
-		}
-		
-		// Check if the connected peers have fallen under too low.
-		int minTreshold = Math.min(_addressToPeerMap.size() / 2, MIN_NUMBER_OF_CONNECTED_PEERS);
-		if(_connectedPeersMap.size() < minTreshold && _torrentSession.isDownloading()) {
-			try {
-				_torrentSession.getAnnounceService().sendEmergencyTrackerRequest();
-			} catch (InterruptedException e) {
-				_logger.warn("Could not send an emergency tracker request: {}", e.getMessage());
-			}
 		}
 	}
 	

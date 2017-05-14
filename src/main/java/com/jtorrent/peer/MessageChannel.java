@@ -200,7 +200,7 @@ public class MessageChannel {
 					
 					notifyMessageListeners(message);
 				}
-			} catch (IOException e) {
+			} catch (IOException | IllegalArgumentException e) {
 				notifyExceptionListeners(e);
 			} finally{
 				if(_selector != null) {

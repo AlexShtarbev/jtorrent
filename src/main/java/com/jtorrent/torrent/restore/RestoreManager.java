@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jtorrent.messaging.announce.ConnectionService;
 import com.jtorrent.peer.Peer;
-import com.jtorrent.torrent.TorrentClient;
 import com.jtorrent.torrent.TorrentSession;
 import com.jtorrent.torrent.TorrentSession.Status;
 
@@ -126,7 +125,7 @@ public class RestoreManager {
 		return false;
 	}
 	
-	public void removeTorrentSessionRestorePoint(TorrentSession session) throws JsonGenerationException, JsonMappingException, IOException {	
+	public void removeTorrentSession(TorrentSession session) throws JsonGenerationException, JsonMappingException, IOException {	
 		TorrentClientRestorePoint lastRestore = getLastRestorePoint();
 		List<TorrentSessionRestorePoint> restorePoints = lastRestore.getTorrentSessions();
 		
@@ -193,7 +192,7 @@ public class RestoreManager {
 			TorrentClientRestorePoint rp = rm.getLastRestorePoint();
 			System.out.print(rp.toString());			
 			
-			rm.removeTorrentSessionRestorePoint(ts1);
+			rm.removeTorrentSession(ts1);
 			rp = rm.getLastRestorePoint();
 			System.out.print(rp.toString());
 		} catch (Exception e) {

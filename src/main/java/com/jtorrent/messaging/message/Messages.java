@@ -1,5 +1,6 @@
 package com.jtorrent.messaging.message;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 import com.jtorrent.messaging.message.Message.MessageType;
@@ -9,7 +10,12 @@ public class Messages {
 
 	public static Message parse(TorrentSession session, ByteBuffer message) throws MessageExchangeException {
 		message.rewind();
-		int len = message.getInt();
+		int len = 0;
+		try {
+			len = message.getInt();
+		} catch(BufferOverflowException e) {
+			throw new MessageExchangeException(e.getMessage());
+		}
 		if(len == 0) {
 			return KeepAliveMessage.parse(session, message);
 		}

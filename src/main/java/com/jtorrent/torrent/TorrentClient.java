@@ -178,7 +178,7 @@ public class TorrentClient implements TorrentSessionEventListener {
 	
 	public synchronized void removeTorrentSession(TorrentSession session) throws Exception {
 		try {
-			_restoreManager.removeTorrentSessionRestorePoint(session);
+			_restoreManager.removeTorrentSession(session);
 		} catch (Exception e) {
 			_logger.warn("Could not remove resotre point for {}: e", session.getTorrentFileName(),
 					e.getMessage());
